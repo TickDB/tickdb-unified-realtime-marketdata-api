@@ -1,0 +1,28 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://localhost"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "https://tickdb.ai/"
+    }
+  ],
+  "httpHeaders": [
+    {
+      "urls": ["https://api.tickdb.ai"],
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (compatible; GitHub Actions Link Checker)"
+      }
+    }
+  ],
+  "timeout": "10s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackHttpStatus": [400, 401, 403, 404, 500, 502, 503]
+}
