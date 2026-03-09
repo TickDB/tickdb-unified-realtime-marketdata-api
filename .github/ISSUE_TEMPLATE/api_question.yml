@@ -1,0 +1,35 @@
+name: API 使用问题
+description: 咨询 TickDB API 的使用问题
+title: "[API问题]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        如果你在使用 TickDB API 时遇到问题，可以在这里提问。
+
+  - type: input
+    id: api
+    attributes:
+      label: API 接口
+      placeholder: /api/v1/...
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 问题描述
+      description: 请描述你想实现什么功能或遇到什么问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 请求示例 / 代码
+      description: 如果可以，请提供请求示例
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 其他补充信息

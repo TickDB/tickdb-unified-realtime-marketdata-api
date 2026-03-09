@@ -1,0 +1,45 @@
+name: Bug 反馈
+description: 报告 TickDB 的程序 Bug
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提交 Bug！请尽量提供完整信息，方便我们快速定位问题。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug 描述
+      description: 请描述你遇到的问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 如何复现这个问题？
+      placeholder: |
+        1. 调用某个 API
+        2. 使用参数 ...
+        3. 出现错误 ...
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+      description: 你期望的结果是什么？
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 实际发生了什么？
+
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: OS / 编程语言

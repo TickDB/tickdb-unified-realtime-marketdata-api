@@ -1,0 +1,50 @@
+name: 数据问题反馈
+description: 反馈 TickDB 返回的行情数据异常或偏差
+title: "[数据问题]: "
+labels: ["data", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        如果你发现 TickDB 返回的数据与其他平台不一致，请提供以下信息，方便我们排查。
+
+  - type: input
+    id: api
+    attributes:
+      label: API 接口
+      placeholder: /api/v1/market/kline
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: 完整请求 URL
+      placeholder: https://api.tickdb.ai/...
+
+  - type: input
+    id: symbol
+    attributes:
+      label: 查询 Symbol
+      placeholder: 例如：000001.SZ
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+      description: 你对比的数据来源（如：同花顺 / 东方财富 / 交易所官网）
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际返回数据
+      description: 请提供 TickDB 返回的数据示例
+      render: json
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 截图或证据
+      description: 如有对比截图或数据，请上传

@@ -1,0 +1,34 @@
+name: 功能建议
+description: 为 TickDB 提出新的功能建议
+title: "[功能建议]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        欢迎提出你的想法，帮助 TickDB 变得更好。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 需求背景
+      description: 你遇到了什么问题？为什么需要这个功能？
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 建议的解决方案
+      description: 描述你希望增加的功能
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 是否有其他解决方式？
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息
