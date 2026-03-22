@@ -14,20 +14,26 @@
 
 [📚 Online Docs](https://docs.tickdb.ai) • [🌐 Website](https://tickdb.ai)
 
+### 🤖 AI Skill
+
+We provide an [AI Skill file](SKILL/SKILL.md) for AI-powered IDEs (such as Cursor, Windsurf, Kiro, etc.).  
+Add it to your project so your AI assistant can directly call TickDB APIs to fetch real-time market data.
+
 </div>
 
 ---
 
 ## 🎯 What is TickDB?
 
-TickDB is a **developer-first unified real-time market data API** that provides seamless access to multiple financial markets through a single connection.
+TickDB is a **developer-friendly, AI-friendly** unified real-time market data API that provides seamless access to multiple financial markets through a single connection.
 
-Through **one connection**, you can seamlessly access real-time and historical market data from multiple financial markets. 
+Through **one connection**, you can access real-time and historical market data across Forex, Precious Metals, Indices, US Stocks, HK Stocks, A-Shares, and Crypto.
 
 It is built for developers who **require reliable, low-latency, and production-grade** market data—without the overhead of managing multiple data sources, protocols, or vendors.
 
-> TickDB provides real-time financial market data across forex, commodities, equities, indices, and cryptocurrencies.
-> It supports tick-level trade data, order book depth, and candlestick (K-line) data via REST APIs and WebSocket streams,
+TickDB also ships with a ready-to-use [AI Skill file](SKILL/SKILL.md) that enables AI-powered coding assistants (Cursor, Windsurf, Kiro, etc.) to **understand and invoke TickDB APIs directly**, allowing natural-language-driven market data queries and integration to dramatically boost development productivity.
+
+> TickDB supports tick-level trade data, order book depth, and candlestick (K-line) data via REST APIs and WebSocket streams,
 > making it suitable for quantitative trading, real-time market dashboards, trading platforms, and market data analytics.
 
 ---
@@ -35,9 +41,10 @@ It is built for developers who **require reliable, low-latency, and production-g
 ### ✨ Key Features
 
 - **🔌 Unified Access** - One API for multiple markets and asset classes
-- **⚡ Real-time Data** - WebSocket-based streaming with ~50ms end-to-end latency
+- **⚡ Real-time Data** - WebSocket-based streaming with ~10-50ms end-to-end latency
 - **🌍 Multi-Market Support** - Forex, Precious Metals, Indices, US Stocks, HK Stocks, A-Shares, Crypto
-- **🛠️ Developer-Friendly** - RESTful API + WebSocket, rich examples, complete documentation
+- **🛠️ Developer-Friendly** - RESTful API + WebSocket, structured JSON responses, complete docs and multi-language examples
+- **🤖 AI-Friendly** - Built-in [AI Skill](SKILL/SKILL.md) for AI IDEs to call APIs directly—fetch market data with natural language
 
 ### 🏗️ Typical Use Cases
 
