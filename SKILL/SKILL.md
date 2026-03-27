@@ -79,7 +79,7 @@ description: >
 | "当前K线" / "实时K线" | `GET /v1/market/kline/latest` | `symbols=BTCUSDT&interval=5m` |
 | "买卖盘" / "订单簿" / "深度" | `GET /v1/market/depth` | `symbol=BTCUSDT&limit=20` |
 | "最近成交" / "成交记录" | `GET /v1/market/trades` | `symbol=BTCUSDT&limit=20` |
-| "支持哪些品种" / "有哪些股票" | `GET /v1/symbols/available` | `market=CRYPTO` |
+| "支持哪些品种" / "有哪些股票" | `GET /v1/symbols/available` | `type=stock&market=HK` |
 | "股票信息" / "基本面" / "公司数据" | `GET /v1/market/stock-info` | `symbols=700.HK,AAPL.US` |
 | "分时" / "当日走势" / "分钟数据" | `GET /v1/market/intraday` | `symbols=700.HK` |
 | "交易时段" / "开盘时间" / "收盘时间" | `GET /v1/market/trading-sessions` | `market=HK` |
@@ -245,7 +245,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/ticker?symbols=XAUUSD,TSLA.US,BTCUS
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | symbol | string | 是 | 交易产品代码 |
-| interval | string | 是 | K线周期：1m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M |
+| interval | string | 是 | K线周期：1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
 | limit | integer | 否 | 返回记录数，默认100，最大1000 |
 | start_time | integer | 否 | 开始时间戳（毫秒） |
 | end_time | integer | 否 | 结束时间戳（毫秒） |
@@ -289,7 +289,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/kline?symbol=BTCUSDT&interval=1h&li
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | symbols | string | 是 | 交易产品代码，多个用逗号分隔 |
-| interval | string | 是 | K线周期：1m, 3m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M |
+| interval | string | 是 | K线周期：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
 
 **返回字段**: 同历史K线
 
@@ -362,34 +362,44 @@ curl -X GET "https://api.tickdb.ai/v1/market/trades?symbol=BTCUSDT&limit=20" \
 
 ---
 
-## 可用交易品种 (Available Symbols)
+## 产品查询 (Symbol Query)
 
-查询TickDB支持的所有可用交易品种。
+查询 TickDB 支持的产品，覆盖外汇、指数、美股、港股、A股、加密货币等市场，共计超过 27,000 个产品。
 
 **端点**: `GET /v1/symbols/available`
 
 **参数**:
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| market | string | 否 | 市场过滤：FOREX, METALS, INDICES, US, HK, CN, CRYPTO |
-| limit | integer | 否 | 返回数量，默认100，最大500 |
-| page | integer | 否 | 页码，默认1 |
+| type | string | 否 | 产品类型过滤：stock, crypto, forex, indices |
+| market | string | 否 | 市场过滤：GLOBAL, US, HK, CN |
+| limit | integer | 否 | 每页返回数量，默认100，最大1000 |
+| offset | integer | 否 | 分页偏移量，默认0 |
 
 **返回字段**:
 | 字段 | 说明 |
 |------|------|
-| symbols[] | 交易品种数组 |
-| symbols[].symbol | 交易品种代码 |
-| symbols[].market | 市场代码 |
-| symbols[].base_asset | 基础资产 |
-| symbols[].quote_asset | 报价资产 |
-| symbols[].status | 状态（active） |
-| total | 总数量 |
-| page | 当前页码 |
+| products[] | 产品数组 |
+| products[].symbol | 产品代码 |
+| products[].name | 产品名称 |
+| products[].market | 市场代码 |
+| products[].type | 产品类型（stock/crypto/forex/indices） |
+| products[].currency | 交易币种（CNY/USD/HKD/USDT） |
+| products[].is_active | 是否活跃 |
+| products[].updated_at | 更新时间 |
+| summary | 汇总信息 |
+| summary.total_products | 产品总数 |
+| summary.by_market | 按市场统计数量 |
+| summary.by_type | 按类型统计数量 |
+| pagination | 分页信息 |
+| pagination.limit | 每页数量 |
+| pagination.offset | 偏移量 |
+| pagination.total | 总数 |
+| pagination.count | 当前页返回数量 |
 
 **示例请求**:
 ```bash
-curl -X GET "https://api.tickdb.ai/v1/symbols/available?market=CRYPTO&limit=20" \
+curl -X GET "https://api.tickdb.ai/v1/symbols/available?type=crypto&limit=20" \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
@@ -400,6 +410,13 @@ curl -X GET "https://api.tickdb.ai/v1/symbols/available?market=CRYPTO&limit=20" 
 查询系统支持的K线周期列表。
 
 **端点**: `GET /v1/market/intervals/kline`
+
+**返回字段**:
+| 字段 | 说明 |
+|------|------|
+| count | 支持的周期数量 |
+| description | 接口说明 |
+| intervals | 支持的K线周期列表 |
 
 **示例请求**:
 ```bash
@@ -436,6 +453,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/intervals/kline" \
 | lot_size | 每手股数 |
 | total_shares | 总股本 |
 | circulating_shares | 流通股本 |
+| hk_shares | 港股股本（仅港股） |
 | eps | 每股盈利 |
 | eps_ttm | 每股盈利（TTM） |
 | bps | 每股净资产 |
@@ -704,13 +722,21 @@ GET /v1/market/depth?symbol=BTCUSDT&limit=20
 | 错误码 | 说明 |
 |--------|------|
 | 0 | 成功 |
-| 400 | 请求参数错误 |
-| 401 | 未授权（API Key无效或缺失） |
-| 403 | 权限不足 |
-| 429 | 请求过于频繁（限流） |
-| 500 | 服务器内部错误 |
+| 1001 | API Key 无效或已过期 |
+| 1002 | 未提供 API Key |
+| 1003 | IP 不在白名单 |
+| 1004 | 权限不足 |
+| 2001 | 参数错误 |
+| 2002 | 交易品种不存在 |
+| 2003 | 时间范围无效 |
+| 2004 | 请求数量超限 |
+| 3001 | 请求频率超限 |
+| 3002 | 配额已用尽 |
+| 5000 | 服务器内部错误 |
+| 5001 | 数据源不可用 |
+| 5002 | 服务暂时不可用 |
 
 如遇错误，请检查：
-1. API Key是否正确
-2. 请求参数格式是否正确
-3. 是否超出接口调用限制
+1. API Key是否正确（1001/1002）
+2. 请求参数格式是否正确（2001-2004）
+3. 是否超出接口调用限制（3001/3002）
