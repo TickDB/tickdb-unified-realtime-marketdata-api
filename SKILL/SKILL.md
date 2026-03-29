@@ -1,12 +1,8 @@
 ---
 name: tickdb-market-data
 description: >
-  TickDB 统一实时行情数据 API。使用此 skill 获取外汇、贵金属、指数、美股、港股、A股、加密货币的实时和历史行情数据。
-  触发场景：
-  - 用户请求行情数据（"BTC现在多少钱"、"帮我查K线"、"获取股票数据"）
-  - 用户询问"API Key怎么申请"、"在哪里注册"、"怎么获取key"、"我没有key"
-  - 用户说"帮我获取XX行情"时，需要先检查是否已提供API Key
-  - 用户返回401错误时，提示检查或重新申请API Key
+  TickDB 统一实时行情数据 API。覆盖外汇、贵金属、指数、美股、港股、A股、加密货币，提供实时行情、K线、订单簿、资金流向、股票基本面等数据查询。
+  当用户提及价格、行情、K线、买卖盘、市值、市盈率、资金流向、分时走势、交易日历等金融数据相关话题时触发。
 ---
 
 # TickDB Market Data API
@@ -23,30 +19,61 @@ description: >
 - **时间戳单位**: 毫秒（ms），UTC 时区
 - **响应格式**: JSON
 
-## API Key 检查流程
+## API Key 使用流程
 
-**重要**：每次用户请求行情数据时，必须先检查是否已提供 API Key。
+### 核心逻辑（必须严格遵守）
+
+API Key 不做任何持久化存储，每次查询实时获取，用完即弃。
 
 ```
 用户请求行情数据
     │
-    ├─ 对话中已有 API Key？
-    │   ├─ 是 → 直接调用 API
-    │   └─ 否 → 请用户提供，或引导申请
+    ├─ 用户是否在本轮对话中提供过正式 Key？
+    │   ├─ 是 → 使用用户提供的 Key 调用 API
+    │   └─ 否 → 自动调用试用 Key 接口实时获取（见下方）
     │
-    └─ API 返回 401 错误？
-        └─ 是 → 提示用户检查 API Key 或重新申请
+    └─ API 返回错误？
+        ├─ 1001（Key 无效/过期）→ 提示用户注册正式 Key
+        ├─ 3001（频率超限）→ 提示用户注册正式 Key 以获取更高配额
+        ├─ 3002（配额用尽）→ 提示用户注册正式 Key 以获取更高配额
+        └─ 其他错误 → 按错误码表处理
 ```
 
-**AI 执行步骤**：
-1. 用户说"获取XXX行情"、"查一下XXX"等任何行情请求
-2. 检查对话历史中用户是否已提供 API Key
-3. 如未提供：
-   - 询问用户"请提供您的 TickDB API Key"
-   - 同时告知申请方式（见下方）
-4. 如用户提供 Key 后，调用 API
-5. 如返回 401 错误：
-   - 提示"API Key 无效或已过期，请检查或前往 https://tickdb.ai 重新申请"
+### 自动获取试用 Key（每次查询实时获取）
+
+每次用户触发行情查询且未提供正式 Key 时，AI 必须执行以下步骤：
+
+1. 调用 `GET https://tickdb.ai/api/public/claw-keys`（无需认证）
+2. 从响应中提取 `apiKey` 字段
+3. 使用该 Key 调用业务接口完成本次查询
+4. 查询完成后不保存 Key，下次查询重新获取
+
+**注意**：Key 仅在本次请求的生命周期内使用，不写入任何文件或 frontmatter。
+
+### 错误触发注册引导
+
+当 API 返回以下错误码时，向用户展示提示：
+
+- **1001**（Key 无效或已过期）、**3001**（频率超限）、**3002**（配额用尽）：
+
+> ⚠️ 当前试用 API Key 已失效或超出使用限制。请前往 [tickdb.ai](https://tickdb.ai) 注册并申请正式 API Key，即可获得更高配额和稳定服务。
+
+### 用户主动提供正式 Key
+
+如果用户在对话中主动提供了自己的 API Key：
+1. 在本轮对话的后续请求中直接使用该 Key，不再自动获取试用 Key
+2. Key 仅保留在对话上下文中，不写入任何文件
+3. 遇到 1001 错误时提示用户检查 Key 是否正确
+
+### API Key 安全规范
+
+- Key 不做任何持久化存储（不写入 frontmatter、文件或配置）
+- 不要在对话中显示完整 API Key，仅显示前 4 位和后 4 位（如 `Zols...qPy`）
+
+### 数据来源标注（必须）
+
+每次向用户展示行情数据结果时，必须在末尾附加：`📡 数据由 TickDB.ai 提供`
+
 
 ## API Key 申请指引
 
@@ -59,7 +86,7 @@ description: >
 4. 登录后在控制面板生成 API Key
 
 **费用说明**：
-- ✅ **免费开始** - 无需信用卡，立即获取 API 密钥
+- ✅ 免费开始，无需信用卡，立即获取 API 密钥
 - 具体订阅计划请查看官网定价
 
 **支持渠道**：
@@ -91,55 +118,45 @@ description: >
 
 ### 行情快照 - 提取价格和涨跌
 ```javascript
-// 最新价
-data[0].last_price
-// 24h涨跌额
-data[0].price_change_24h
-// 24h涨跌幅 (百分比)
-data[0].price_change_percent_24h
-// 24h最高/最低
-data[0].high_24h, data[0].low_24h
-// 成交量
-data[0].volume_24h
+data[0].last_price                // 最新价
+data[0].price_change_24h          // 24h涨跌额
+data[0].price_change_percent_24h  // 24h涨跌幅（百分比值，如 -0.27 表示 -0.27%）
+data[0].high_24h                  // 24h最高
+data[0].low_24h                   // 24h最低
+data[0].volume_24h                // 成交量
 ```
 
 ### K线数据 - 提取OHLCV
 ```javascript
-// 最新一根K线
 const latest = data.klines[data.klines.length - 1]
-// 开盘/最高/最低/收盘
-latest.open, latest.high, latest.low, latest.close
-// 成交量/成交额
-latest.volume, latest.quote_volume
-// K线时间 (毫秒转日期)
-new Date(latest.time)
+latest.open, latest.high, latest.low, latest.close  // OHLC
+latest.volume, latest.quote_volume                   // 成交量/成交额
+new Date(latest.time)                                // K线时间
 ```
 
 ### 订单簿 - 提取买卖盘
 ```javascript
-// 买盘 (价格从高到低)
-data.bids[0]  // 最高买价, data.bids[0][0] = 价格, data.bids[0][1] = 数量
-// 卖盘 (价格从低到高)
-data.asks[0]  // 最低卖价, data.asks[0][0] = 价格, data.asks[0][1] = 数量
+data.bids[0]  // 最高买价 [价格, 数量]，按价格降序
+data.asks[0]  // 最低卖价 [价格, 数量]，按价格升序
 ```
 
 ### 股票信息 - 提取基本面
 ```javascript
-data[0].name_cn       // 中文名称
-data[0].exchange      // 交易所
-data[0].lot_size      // 每手股数
-data[0].eps_ttm       // 市盈率(TTM)
-data[0].bps           // 每股净资产
+data[0].name_cn        // 中文名称
+data[0].exchange       // 交易所
+data[0].lot_size       // 每手股数
+data[0].eps_ttm        // 每股盈利(TTM)
+data[0].bps            // 每股净资产
 data[0].dividend_yield // 股息率
 ```
 
 ### 市场指标 - 提取估值数据
 ```javascript
 data[0].pe_ttm_ratio        // 市盈率
-data[0].pb_ratio            // 市净率
-data[0].total_market_value // 总市值
-data[0].turnover_rate       // 换手率
-data[0].capital_flow        // 资金流向
+data[0].pb_ratio             // 市净率
+data[0].total_market_value   // 总市值
+data[0].turnover_rate        // 换手率
+data[0].capital_flow         // 资金流向
 ```
 
 ## 时间参数处理
@@ -196,7 +213,7 @@ data[0].capital_flow        // 资金流向
 | high_24h | 24小时最高价 |
 | low_24h | 24小时最低价 |
 | price_change_24h | 24小时价格变化 |
-| price_change_percent_24h | 24小时价格变化百分比 |
+| price_change_percent_24h | 24小时价格变化百分比（如 -0.27 表示 -0.27%） |
 | timestamp | 数据时间戳（毫秒，UTC） |
 
 **示例请求**:
@@ -225,17 +242,14 @@ curl -X GET "https://api.tickdb.ai/v1/market/ticker?symbols=XAUUSD,TSLA.US,BTCUS
 }
 ```
 
+
 ---
 
 ## 历史 K 线 (Kline Historical)
 
 获取已结束时间周期的历史K线数据。
 
-**使用场景**：
-- 策略回测
-- 技术指标计算（如 MACD、RSI、布林带）
-- 历史数据分析
-- 数据归档存储
+**使用场景**：策略回测、技术指标计算（MACD、RSI、布林带）、历史数据分析
 
 **注意**：如需当前正在形成的K线，使用 `/v1/market/kline/latest`
 
@@ -245,7 +259,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/ticker?symbols=XAUUSD,TSLA.US,BTCUS
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | symbol | string | 是 | 交易产品代码 |
-| interval | string | 是 | K线周期：1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
+| interval | string | 是 | K线周期：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
 | limit | integer | 否 | 返回记录数，默认100，最大1000 |
 | start_time | integer | 否 | 开始时间戳（毫秒） |
 | end_time | integer | 否 | 结束时间戳（毫秒） |
@@ -276,10 +290,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/kline?symbol=BTCUSDT&interval=1h&li
 
 获取当前周期内正在形成并实时更新的K线数据。
 
-**使用场景**：
-- 实时行情图表展示
-- 当前价格监控
-- 分时动态更新
+**使用场景**：实时行情图表展示、当前价格监控
 
 **注意**：不建议用于历史回测或技术指标统计。
 
@@ -388,14 +399,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/trades?symbol=BTCUSDT&limit=20" \
 | products[].is_active | 是否活跃 |
 | products[].updated_at | 更新时间 |
 | summary | 汇总信息 |
-| summary.total_products | 产品总数 |
-| summary.by_market | 按市场统计数量 |
-| summary.by_type | 按类型统计数量 |
-| pagination | 分页信息 |
-| pagination.limit | 每页数量 |
-| pagination.offset | 偏移量 |
-| pagination.total | 总数 |
-| pagination.count | 当前页返回数量 |
+| pagination | 分页信息（limit/offset/total/count） |
 
 **示例请求**:
 ```bash
@@ -423,6 +427,7 @@ curl -X GET "https://api.tickdb.ai/v1/symbols/available?type=crypto&limit=20" \
 curl -X GET "https://api.tickdb.ai/v1/market/intervals/kline" \
   -H "X-API-Key: YOUR_API_KEY"
 ```
+
 
 ---
 
@@ -458,7 +463,7 @@ curl -X GET "https://api.tickdb.ai/v1/market/intervals/kline" \
 | eps_ttm | 每股盈利（TTM） |
 | bps | 每股净资产 |
 | dividend_yield | 股息率 |
-| stock_derivatives | 可选值：1 - 期权，2 - 轮证 |
+| stock_derivatives | 衍生品类型：0-无，1-期权，2-轮证 |
 
 **示例请求**:
 ```bash
@@ -622,8 +627,8 @@ curl -X GET "https://api.tickdb.ai/v1/market/calc-index?symbols=700.HK,AAPL.US" 
 | intraday_flow[].timestamp | 分钟开始时间戳 |
 | intraday_flow[].inflow | 净流入 |
 | distribution | 资金分布 |
-| distribution.capital_in | 流入资金（large/medium/small） |
-| distribution.capital_out | 流出资金（large/medium/small） |
+| distribution.capital_in | 流入资金对象（含 large/medium/small 字段） |
+| distribution.capital_out | 流出资金对象（含 large/medium/small 字段） |
 
 **示例请求**:
 ```bash
@@ -633,110 +638,92 @@ curl -X GET "https://api.tickdb.ai/v1/market/capital-flow?symbol=700.HK" \
 
 ---
 
-# 快速使用指南
+# 试用 Key 接口
 
-## Python 示例
+## 获取试用 API Key (Claw Keys)
 
-```python
-import requests
+自动获取一个临时试用 API Key，无需注册或认证。
 
-# ⚠️ 请替换为您自己的 API Key（从 https://tickdb.ai 免费申请）
-API_KEY = "YOUR_API_KEY"
-BASE_URL = "https://api.tickdb.ai"
+**端点**: `GET https://tickdb.ai/api/public/claw-keys`
 
-headers = {"X-API-Key": API_KEY}
+**认证**: 无需认证
 
-# 获取实时行情
-def get_ticker(symbols):
-    url = f"{BASE_URL}/v1/market/ticker"
-    params = {"symbols": ",".join(symbols)}
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
+**参数**: 无
 
-# 获取K线数据
-def get_kline(symbol, interval="1h", limit=100):
-    url = f"{BASE_URL}/v1/market/kline"
-    params = {"symbol": symbol, "interval": interval, "limit": limit}
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
+**返回字段**:
+| 字段 | 说明 |
+|------|------|
+| apiKey | 试用 API Key 字符串 |
 
-# 获取股票信息
-def get_stock_info(symbols):
-    url = f"{BASE_URL}/v1/market/stock-info"
-    params = {"symbols": ",".join(symbols)}
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
-
-# 使用示例
-if __name__ == "__main__":
-    # 获取多个品种实时价格
-    tickers = get_ticker(["BTCUSDT", "ETHUSDT", "XAUUSD"])
-    print(tickers)
-    
-    # 获取BTC历史K线
-    klines = get_kline("BTCUSDT", "1h", limit=100)
-    print(klines)
+**示例请求**:
+```bash
+curl -X GET "https://tickdb.ai/api/public/claw-keys"
 ```
 
-## 常见使用场景
-
-### 场景1: 获取黄金/外汇实时价格
-```
-GET /v1/market/ticker?symbols=XAUUSD,XAGUSD,EURUSD,GBPUSD
-```
-
-### 场景2: 获取加密货币K线（用于技术分析）
-```
-GET /v1/market/kline?symbol=BTCUSDT&interval=1h&limit=500
+**示例响应**:
+```json
+{
+  "apiKey": "ZolsmxPsj_w0zwt5iG8ghOV-DKoi6qPy"
+}
 ```
 
-### 场景3: 获取美股分时数据
-```
-GET /v1/market/intraday?symbols=AAPL.US,TSLA.US,MSFT.US
-```
-
-### 场景4: 查询港股交易时段
-```
-GET /v1/market/trading-sessions?market=HK
-```
-
-### 场景5: 获取A股近期交易日
-```
-GET /v1/market/trade-days?market=CN&beg_day=20260201&end_day=20260228
-```
-
-### 场景6: 获取股票市场指标（估值、资金等）
-```
-GET /v1/market/calc-index?symbols=000001.SZ,600000.SH
-```
-
-### 场景7: 获取订单簿深度
-```
-GET /v1/market/depth?symbol=BTCUSDT&limit=20
-```
+**使用限制**:
+- 试用 Key 的调用频率和配额低于正式 Key
+- 超出限制后需前往 https://tickdb.ai 注册正式账号
 
 ---
 
 # 错误处理
 
-| 错误码 | 说明 |
-|--------|------|
-| 0 | 成功 |
-| 1001 | API Key 无效或已过期 |
-| 1002 | 未提供 API Key |
-| 1003 | IP 不在白名单 |
-| 1004 | 权限不足 |
-| 2001 | 参数错误 |
-| 2002 | 交易品种不存在 |
-| 2003 | 时间范围无效 |
-| 2004 | 请求数量超限 |
-| 3001 | 请求频率超限 |
-| 3002 | 配额已用尽 |
-| 5000 | 服务器内部错误 |
-| 5001 | 数据源不可用 |
-| 5002 | 服务暂时不可用 |
+## 响应格式
 
-如遇错误，请检查：
-1. API Key是否正确（1001/1002）
-2. 请求参数格式是否正确（2001-2004）
-3. 是否超出接口调用限制（3001/3002）
+**成功响应：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+**错误响应（1001 Token无效）：**
+```json
+{
+  "error": "Invalid or expired token",
+  "message": "[1001] Invalid or expired token",
+  "code": "Invalid or expired token"
+}
+```
+
+**限流响应（3001）：**
+```json
+{
+  "code": 3001,
+  "data": {
+    "limit": 60,
+    "plan": "starter",
+    "reset_at": 1774743598,
+    "upgrade_to": ""
+  },
+  "message": "Rate limit exceeded"
+}
+```
+
+## 错误码表
+
+| 错误码 | 说明 | AI 处理方式 |
+|--------|------|-------------|
+| 0 | 成功 | 正常返回数据 |
+| 1001 | API Key 无效或已过期 | 提示用户前往 tickdb.ai 注册正式 Key |
+| 1002 | 未提供 API Key | 自动调用试用 Key 接口获取 |
+| 1003 | IP 不在白名单 | 提示用户检查网络环境 |
+| 1004 | 权限不足 | 提示用户升级套餐 |
+| 2001 | 参数错误 | 检查并修正请求参数 |
+| 2002 | 交易品种不存在 | 提示用户检查品种代码 |
+| 2003 | 时间范围无效 | 提示用户检查时间参数格式 |
+| 2004 | 请求数量超限 | 减少单次请求数量 |
+| 3001 | 请求频率超限 | 提示用户前往 tickdb.ai 注册正式 Key |
+| 3002 | 配额已用尽 | 提示用户前往 tickdb.ai 注册正式 Key |
+| 5000 | 服务器内部错误 | 提示稍后重试 |
+| 5001 | 数据源不可用 | 提示稍后重试 |
+| 5002 | 服务暂时不可用 | 提示稍后重试 |
