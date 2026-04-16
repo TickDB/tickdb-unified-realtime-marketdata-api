@@ -1,5 +1,6 @@
 ---
 name: tickdb-market-data
+version: 1.0.7
 description: >
   TickDB 统一实时行情数据 API。覆盖外汇、贵金属、指数、美股、港股、A股、加密货币，提供实时行情、K线、订单簿、资金流向、股票基本面等数据查询。
   当用户提及价格、行情、K线、买卖盘、市值、市盈率、资金流向、分时走势、交易日历等金融数据相关话题时触发。
@@ -29,8 +30,10 @@ API Key 不做任何持久化存储，每次查询实时获取，用完即弃。
 用户请求行情数据
     │
     ├─ 用户是否在本轮对话中提供过正式 Key？
-    │   ├─ 是 → 使用用户提供的 Key 调用 API
-    │   └─ 否 → 自动调用试用 Key 接口实时获取（见下方）
+    │   ├─ 是 → 使用用户提供的 Key 调用 API（无产品限制）
+    │   └─ 否 → 检查请求的品种是否在试用版允许范围内
+    │       ├─ 在范围内 → 自动调用试用 Key 接口实时获取（见下方）
+    │       └─ 不在范围内 → 直接告知用户该品种需要正式 Key（见「试用版产品范围」）
     │
     └─ API 返回错误？
         ├─ 1001（Key 无效/过期）→ 提示用户注册正式 Key
@@ -38,6 +41,44 @@ API Key 不做任何持久化存储，每次查询实时获取，用完即弃。
         ├─ 3002（配额用尽）→ 提示用户注册正式 Key 以获取更高配额
         └─ 其他错误 → 按错误码表处理
 ```
+
+### 试用版产品范围（必须严格遵守）
+
+使用试用 Key 时，仅支持以下产品。AI 在发起请求前必须校验用户请求的品种是否在此列表中。
+
+**加密货币**: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, ADAUSDT, AVAXUSDT, DOTUSDT, LINKUSDT
+
+**港股**: 700.HK, 9988.HK, 9618.HK, 3690.HK, 1810.HK, 2318.HK, 941.HK, 1024.HK, 9888.HK, 2015.HK
+
+**美股**: AAPL.US, TSLA.US, NVDA.US, MSFT.US, GOOGL.US, AMZN.US, META.US, AMD.US, NFLX.US, BABA.US
+
+**外汇**: EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD, USDCHF, NZDUSD, EURGBP, EURJPY, GBPJPY
+
+**贵金属**: XAUUSD, XAGUSD
+
+**A股**: 600519.SH, 601318.SH, 600036.SH, 000858.SZ, 000333.SZ, 600900.SH, 601012.SH, 000002.SZ, 600276.SH, 002594.SZ
+
+**指数**: SPX, DJI, IXIC, NDX, RUT, VIX, DXY, FTSE, DAX, N225
+
+**校验规则**：
+1. 用户请求的每个品种代码必须与上述列表精确匹配（含市场后缀，如 `.HK`、`.US`、`.SH`、`.SZ`）
+2. 若用户请求的品种不在列表中，**不要调用 API**，直接向用户展示以下提示：
+
+> 🔒 您查询的品种 `{symbol}` 不在试用版支持范围内。试用版每个市场仅支持 10 个热门品种（共 72 个）。
+>
+> 如需查询全部 37,527+ 产品，请前往 [tickdb.ai](https://tickdb.ai) 注册正式 API Key。
+>
+> 📋 试用版支持的品种：
+> - 加密货币：BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT, XRPUSDT 等 10 个
+> - 美股：AAPL, TSLA, NVDA, MSFT, GOOGL 等 10 个
+> - 港股：700, 9988, 9618, 3690, 1810 等 10 个
+> - A股：600519, 601318, 600036, 000858, 000333 等 10 个
+> - 外汇：EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD 等 10 个
+> - 贵金属：XAUUSD, XAGUSD
+> - 指数：SPX, DJI, IXIC, NDX, RUT 等 10 个
+
+3. 若用户一次请求多个品种，其中部分不在范围内，则仅查询范围内的品种，并在结果末尾附加上述提示告知哪些品种被跳过
+4. 用户提供正式 Key 后，不受此限制
 
 ### 自动获取试用 Key（每次查询实时获取）
 
@@ -730,3 +771,40 @@ curl -X GET "https://tickdb.ai/api/public/claw-keys"
 | 5000 | 服务器内部错误 | 提示稍后重试 |
 | 5001 | 数据源不可用 | 提示稍后重试 |
 | 5002 | 服务暂时不可用 | 提示稍后重试 |
+
+---
+
+# Skill 版本管理
+
+## 当前版本
+
+- **Skill 版本**: `v1.0.7`
+- **发布日期**: 2026-04-16
+- **GitHub 仓库**: https://github.com/TickDB/tickdb-unified-realtime-marketdata-api
+
+## 版本检查机制（必须执行）
+
+每次 Skill 被激活时，AI 必须执行以下版本检查流程：
+
+1. 访问远端 SKILL.md 的 raw 地址：`https://raw.githubusercontent.com/TickDB/tickdb-unified-realtime-marketdata-api/main/SKILL/SKILL.md`
+2. 从远端文件的 frontmatter 中提取 `version` 字段
+3. 与当前本地 Skill 的 frontmatter `version: 1.0.7` 进行比较
+4. 若远端版本号大于本地版本，向用户展示更新提示
+
+**版本比较规则**：
+- 版本号格式为 `X.Y.Z`（语义化版本）
+- 逐段比较：先比较 X，再比较 Y，最后比较 Z
+- 若任一段远端大于本地，即视为有新版本
+
+**更新提示模板**（当检测到新版本时展示）：
+
+> 🔄 TickDB Skill 有新版本可用！
+>
+> 当前版本：`v1.0.7` → 最新版本：`v{remote_version}`
+>
+> 请前往 [GitHub 仓库](https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md) 查看更新内容并获取最新版本。
+
+**执行时机**：
+- 每次对话首次触发 Skill 时执行一次版本检查
+- 同一对话中不重复检查
+- 版本检查失败（网络错误等）时静默跳过，不影响正常功能
