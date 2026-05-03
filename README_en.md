@@ -14,10 +14,17 @@
 
 [📚 Online Docs](https://docs.tickdb.ai) • [🌐 Website](https://tickdb.ai)
 
-### 🤖 AI Skill
+### 🤖 AI Native Access
 
-We provide an [AI Skill file](SKILL/SKILL.md) for AI-powered IDEs (such as Cursor, Windsurf, Kiro, etc.).  
-Add it to your project so your AI assistant can directly call TickDB APIs to fetch real-time market data.
+TickDB offers three tiers of AI-native integration, from chat to deep automation:
+
+| Tier | Description | Install |
+|------|-------------|---------|
+| **Skill** | Chat-ready, zero config | `npx clawhub@latest install tickdb-market-data` or use the [SKILL file](SKILL/SKILL.md) in this repo |
+| **MCP** | Permanent integration, one-time setup | Configure `mcp.tickdb.ai`, all MCP clients supported |
+| **CLI** | Terminal & Agent ready | `npm install -g tickdb` |
+
+See [AI access on our website](https://tickdb.ai/ai-tools).
 
 </div>
 
@@ -31,7 +38,7 @@ Through **one connection**, you can access real-time and historical market data 
 
 It is built for developers who **require reliable, low-latency, and production-grade** market data—without the overhead of managing multiple data sources, protocols, or vendors.
 
-TickDB also ships with a ready-to-use [AI Skill file](SKILL/SKILL.md) that enables AI-powered coding assistants (Cursor, Windsurf, Kiro, etc.) to **understand and invoke TickDB APIs directly**, allowing natural-language-driven market data queries and integration to dramatically boost development productivity.
+TickDB also ships with three tiers of AI-native access—Skill, MCP, and CLI—enabling AI coding assistants and Agents to **understand and invoke TickDB APIs directly**, allowing natural-language-driven market data queries and integration to dramatically boost development productivity.
 
 > TickDB supports tick-level trade data, order book depth, and candlestick (K-line) data via REST APIs and WebSocket streams,
 > making it suitable for quantitative trading, real-time market dashboards, trading platforms, and market data analytics.
@@ -44,7 +51,7 @@ TickDB also ships with a ready-to-use [AI Skill file](SKILL/SKILL.md) that enabl
 - **⚡ Real-time Data** - WebSocket-based streaming with ~10-50ms end-to-end latency
 - **🌍 Multi-Market Support** - Forex, Precious Metals, Indices, US Stocks, HK Stocks, A-Shares, Crypto
 - **🛠️ Developer-Friendly** - RESTful API + WebSocket, structured JSON responses, complete docs and multi-language examples
-- **🤖 AI-Friendly** - Built-in [AI Skill](SKILL/SKILL.md) for AI IDEs to call APIs directly—fetch market data with natural language
+- **🤖 AI-Friendly** - Skill / MCP / CLI three-tier access, from chat to Agent automation
 
 ### 🏗️ Typical Use Cases
 

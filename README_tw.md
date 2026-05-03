@@ -14,10 +14,17 @@
 
 [📚 在線文檔](https://docs.tickdb.ai) • [🌐 官網](https://tickdb.ai)
 
-### 🤖 AI Skill
+### 🤖 AI Native 接入
 
-我們提供了 [AI Skill 文件](SKILL/SKILL.md)，適用於 AI 編程 IDE（如 Cursor、Windsurf、Kiro 等）。  
-將其添加到項目中，AI 助手即可直接調用 TickDB API 獲取實時行情數據。
+TickDB 提供三檔 AI 原生接入方式，從對話到深度整合全場景覆蓋：
+
+| 方式 | 說明 | 安裝 |
+|------|------|------|
+| **Skill** | 對話即用，零配置 | `npx clawhub@latest install tickdb-market-data` 或直接使用本倉庫 [SKILL 文件](SKILL/SKILL.md) |
+| **MCP** | 永久整合，一次配置 | 配置 `mcp.tickdb.ai`，相容所有 MCP 客戶端 |
+| **CLI** | 終端 & Agent 就緒 | `npm install -g tickdb` |
+
+詳見 [官網 AI 接入頁面](https://tickdb.ai/ai-tools)。
 
 </div>
 
@@ -31,7 +38,7 @@ TickDB 是一個**開發者友好、AI 友好**的統一實時行情數據 API �
 
 TickDB 專為需要**可靠、低延遲、可長期依賴**行情數據的開發者而構建，幫助你**避免管理多個數據源、協議和供應商的複雜性**，專注於業務和策略本身。
 
-同時，TickDB 提供開箱即用的 [AI Skill 文件](SKILL/SKILL.md)，讓 AI 編程助手（Cursor、Windsurf、Kiro 等）能夠**直接理解並調用 TickDB API**，實現自然語言驅動的行情數據查詢與集成，大幅提升開發效率。
+同時，TickDB 提供 Skill、MCP、CLI 三檔 AI 原生接入方式，讓 AI 編程助手和 Agent 能夠**直接理解並調用 TickDB API**，實現自然語言驅動的行情數據查詢與整合，大幅提升開發效率。
 
 > TickDB 支持 tick 級成交數據、盤口深度（order book）、K 線（candlestick）等多種行情形式，
 > 可通過 REST API 與 WebSocket 接入，適用於量化交易、實時行情系統、交易平台與數據分析場景。
@@ -44,7 +51,7 @@ TickDB 專為需要**可靠、低延遲、可長期依賴**行情數據的開發
 - **⚡ 實時數據** - 基於 WebSocket 的流式推送，端到端延遲約 10-50ms
 - **🌍 多市場支持** - 外匯、貴金屬、指數、美股、港股、A股、加密貨幣
 - **🛠️ 開發者友好** - RESTful API + WebSocket，結構化 JSON 響應，完整文檔與多語言示例
-- **🤖 AI 友好** - 內置 [AI Skill](SKILL/SKILL.md)，支持 AI IDE 直接調用 API，自然語言即可獲取行情數據
+- **🤖 AI 友好** - 提供 Skill / MCP / CLI 三檔接入，從對話到 Agent 自動化全覆蓋
 
 ### 🏗️ 典型使用場景
 
