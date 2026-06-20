@@ -49,6 +49,9 @@ MCP_ACCESS_TOKEN=YOUR_TOKEN
 MCP_TRANSPORT=streamable-http
 MCP_HOST=0.0.0.0
 MCP_PORT=8000
+MCP_STATELESS_HTTP=true
+MCP_SESSION_LOG_TTL_SECONDS=3600
+MCP_SESSION_LOG_MAX_ENTRIES=1000
 ```
 
 ### 3. 啟動服務
@@ -195,6 +198,9 @@ server {
 | `MCP_TRANSPORT` | `streamable-http` | 傳輸模式；`stdio` 用於本地 Claude Desktop 直連 |
 | `MCP_HOST` | `0.0.0.0` | 監聽位址 |
 | `MCP_PORT` | `8000` | 監聽埠號 |
+| `MCP_STATELESS_HTTP` | `true` | Streamable HTTP 無狀態模式；避免遺留 MCP session 佔用記憶體 |
+| `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | 會話 ID 僅用於生命週期日誌的保留秒數 |
+| `MCP_SESSION_LOG_MAX_ENTRIES` | `1000` | 會話 ID 日誌快取最大條數（防止記憶體無限增長） |
 | `LOG_LEVEL` | `INFO` | 日誌等級：DEBUG / INFO / WARNING / ERROR |
 | `LOG_RETAIN_DAYS` | `7` | 日誌檔案保留天數 |
 

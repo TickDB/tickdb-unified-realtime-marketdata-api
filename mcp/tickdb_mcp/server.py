@@ -1,5 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
+from tickdb_mcp.config import settings
 from tickdb_mcp.tools import register_all
 
 _INSTRUCTIONS = """\
@@ -21,6 +22,10 @@ Pass your key via the X-TickDB-Key request header or set TICKDB_API_KEY on the s
 
 
 def create_mcp() -> FastMCP:
-    mcp = FastMCP(name="tickdb-market-data", instructions=_INSTRUCTIONS)
+    mcp = FastMCP(
+        name="tickdb-market-data",
+        instructions=_INSTRUCTIONS,
+        stateless_http=settings.mcp_stateless_http,
+    )
     register_all(mcp)
     return mcp

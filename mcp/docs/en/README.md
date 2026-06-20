@@ -97,6 +97,9 @@ Copy `.env.example` to `.env`:
 | `MCP_TRANSPORT` | `streamable-http` | `stdio` for local Claude Desktop direct mode |
 | `MCP_HOST` | `0.0.0.0` | Bind address |
 | `MCP_PORT` | `8000` | Listen port |
+| `MCP_STATELESS_HTTP` | `true` | Avoid retaining abandoned Streamable HTTP sessions in memory |
+| `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | TTL for session IDs kept only for lifecycle logs |
+| `MCP_SESSION_LOG_MAX_ENTRIES` | `1000` | Maximum session IDs kept only for lifecycle logs |
 | `LOG_LEVEL` | `INFO` | Logging verbosity: DEBUG / INFO / WARNING / ERROR |
 | `LOG_RETAIN_DAYS` | `7` | Days to keep rotated log files |
 

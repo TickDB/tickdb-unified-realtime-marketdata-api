@@ -97,6 +97,9 @@ python main.py          # HTTP 服务，监听 :8000
 | `MCP_TRANSPORT` | `streamable-http` | `stdio` 用于本地 Claude Desktop 直连模式 |
 | `MCP_HOST` | `0.0.0.0` | 监听地址 |
 | `MCP_PORT` | `8000` | 监听端口 |
+| `MCP_STATELESS_HTTP` | `true` | Streamable HTTP 无状态模式；避免遗留 MCP session 占用内存 |
+| `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | 会话 ID 仅用于生命周期日志的保留秒数 |
+| `MCP_SESSION_LOG_MAX_ENTRIES` | `1000` | 会话 ID 日志缓存最大条数（防止内存无限增长） |
 | `LOG_LEVEL` | `INFO` | 日志（Logging）级别：DEBUG / INFO / WARNING / ERROR |
 | `LOG_RETAIN_DAYS` | `7` | 日志文件保留天数 |
 

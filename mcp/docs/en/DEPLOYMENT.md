@@ -50,6 +50,9 @@ MCP_ACCESS_TOKEN=your_access_token
 MCP_TRANSPORT=streamable-http
 MCP_HOST=0.0.0.0
 MCP_PORT=8000
+MCP_STATELESS_HTTP=true
+MCP_SESSION_LOG_TTL_SECONDS=3600
+MCP_SESSION_LOG_MAX_ENTRIES=1000
 ```
 
 ### 3. Start the server
@@ -195,6 +198,9 @@ server {
 | `MCP_TRANSPORT` | `streamable-http` | `stdio` for local Claude Desktop direct mode |
 | `MCP_HOST` | `0.0.0.0` | Bind address |
 | `MCP_PORT` | `8000` | Listen port |
+| `MCP_STATELESS_HTTP` | `true` | Streamable HTTP stateless mode; avoids retaining abandoned MCP sessions in memory |
+| `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | TTL for session IDs kept only for lifecycle logs |
+| `MCP_SESSION_LOG_MAX_ENTRIES` | `1000` | Maximum session IDs kept only for lifecycle logs |
 | `LOG_LEVEL` | `INFO` | Logging verbosity: DEBUG / INFO / WARNING / ERROR |
 | `LOG_RETAIN_DAYS` | `7` | Days to retain rotated log files |
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.1.3 - 2026-06-15
+
+### Fixed
+
+- Enabled stateless Streamable HTTP by default via `MCP_STATELESS_HTTP=true` to avoid retaining abandoned MCP sessions in memory.
+- Bounded middleware session lifecycle logging with TTL and max-entry limits to prevent unbounded `_known_sessions` growth during reconnects.
+
+### Added
+
+- Added `MCP_SESSION_LOG_TTL_SECONDS` and `MCP_SESSION_LOG_MAX_ENTRIES` configuration for session lifecycle log retention.
+- Added unit tests for bounded session lifecycle cache behavior.
+
+---
+
 ## v0.1.2 — 2026-05-20
 
 ### Added
@@ -51,7 +65,7 @@
 
 ### Initial Release
 
-- **13 MCP Tools** covering real-time and historical market data:
+- **15 MCP Tools** covering real-time and historical market data:
   - `get_ticker` — real-time price snapshots
   - `get_kline` / `get_kline_latest` / `get_kline_intervals` — K-line candlestick data
   - `get_order_book` — market depth (bid/ask levels)
