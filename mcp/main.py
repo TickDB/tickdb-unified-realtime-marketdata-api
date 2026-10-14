@@ -9,8 +9,8 @@ Usage:
 import uvicorn
 
 from tickdb_mcp.config import settings
+from tickdb_mcp.http import create_http_app
 from tickdb_mcp.logging import get_logger, setup_logging
-from tickdb_mcp.middleware import AuthMiddleware
 from tickdb_mcp.server import create_mcp
 
 
@@ -32,15 +32,12 @@ def main() -> None:
         "configured (env)" if settings.tickdb_api_key else "not set (require per-request header)",
     )
 
-    mcp = create_mcp()
-
     if settings.mcp_transport == "stdio":
         logger.info("Running in stdio mode (local)")
-        mcp.run(transport="stdio")
+        create_mcp().run(transport="stdio")
     else:
         logger.info("Running in HTTP mode on %s:%d", settings.mcp_host, settings.mcp_port)
-        asgi_app = mcp.streamable_http_app()
-        app = AuthMiddleware(asgi_app)
+        app = create_http_app()
         uvicorn.run(app, host=settings.mcp_host, port=settings.mcp_port)
 
 

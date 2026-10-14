@@ -61,9 +61,9 @@ async def demo_tool_call_mock() -> None:
         "data": [
             {
                 "symbol": "BTCUSDT",
-                "price": "67500.00",
+                "last_price": "67500.00",
                 "change": "1250.00",
-                "changePercent": "1.89",
+                "change_rate": "1.89",
                 "volume": "28450.123",
             }
         ],

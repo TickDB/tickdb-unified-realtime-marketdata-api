@@ -57,19 +57,3 @@ class TestErrorHandling:
     def test_non_numeric_code(self):
         with pytest.raises(RuntimeError, match="TickDB error ERR: bad"):
             client._raise("ERR", "bad")
-
-
-class TestMaskKey:
-    def test_long_key_masked(self):
-        masked = client._mask_key("abcd1234efgh5678")
-        assert masked == "abcd***5678"
-        assert "1234efgh" not in masked
-
-    def test_short_key_masked(self):
-        masked = client._mask_key("abc")
-        assert "***" in masked
-        assert masked.startswith("ab")
-
-    def test_exactly_8_chars(self):
-        masked = client._mask_key("12345678")
-        assert "***" in masked

@@ -1,37 +1,24 @@
-# Python
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
-*.pyd
-*.so
-*.egg
+.env
+.env.*
+!.env.example
+.claude/
+.DS_Store
 *.egg-info/
 dist/
 build/
-.eggs/
-.venv/
-venv/
-env/
-
-# Environment
-.env
-.env.local
-
-# Logs
-logs/
-*.log
-
-# Testing
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
+.venv/
+venv/
+logs/
+data/
+*.sqlite
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db

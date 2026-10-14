@@ -1,0 +1,2206 @@
+{
+  "source": "TickDB REST API contract and API Key subscriptions (2026-09-21)",
+  "release_notes_version": "1.0.3",
+  "openapi_info_version": "1.0.2",
+  "operations": [
+    {
+      "tool": "get_ticker",
+      "path": "/v1/market/ticker",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK,AAPL.US",
+            "example": "700.HK,AAPL.US"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_kline",
+      "path": "/v1/market/kline",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK",
+            "example": "700.HK"
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "1d",
+              "1w",
+              "1M"
+            ],
+            "default": "1h",
+            "example": "1h"
+          },
+          "sample": "1h"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "example": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "start_time",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "example": 1703123456789
+          },
+          "sample": 1788192000000
+        },
+        {
+          "name": "end_time",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "example": 1703209856789
+          },
+          "sample": 1789920000000
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "adjust",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "none",
+              "forward",
+              "backward"
+            ],
+            "default": "none",
+            "example": "forward"
+          },
+          "sample": "forward"
+        }
+      ]
+    },
+    {
+      "tool": "get_order_book",
+      "path": "/v1/market/depth",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK",
+            "example": "700.HK"
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_recent_trades",
+      "path": "/v1/market/trades",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK",
+            "example": "700.HK"
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "example": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_available_symbols",
+      "path": "/v1/symbols/available",
+      "parameters": [
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "crypto",
+              "forex",
+              "indices",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "US",
+              "HK",
+              "CN"
+            ],
+            "example": "CN"
+          },
+          "sample": "CN"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100,
+            "example": 50
+          },
+          "sample": 50
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "example": 0
+          },
+          "sample": 0
+        }
+      ]
+    },
+    {
+      "tool": "get_kline_latest",
+      "path": "/v1/market/kline/latest",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "AAPL.US,00700.HK",
+            "example": "AAPL.US,00700.HK"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "1d",
+              "1w",
+              "1M"
+            ],
+            "default": "3m",
+            "example": "3m"
+          },
+          "sample": "3m"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex",
+              "futures"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "adjust",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "none",
+              "forward",
+              "backward"
+            ],
+            "default": "none",
+            "example": "forward"
+          },
+          "sample": "forward"
+        }
+      ]
+    },
+    {
+      "tool": "get_ex_factors",
+      "path": "/v1/market/kline/ex-factors",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "600519.SH",
+            "example": "600519.SH,700.HK,AAPL.US"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "start_time",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sample": 1788192000000
+        },
+        {
+          "name": "end_time",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sample": 1789920000000
+        }
+      ]
+    },
+    {
+      "tool": "get_intraday",
+      "path": "/v1/market/intraday",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK,9988.HK",
+            "example": "700.HK,9988.HK"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_trading_sessions",
+      "path": "/v1/market/trading-sessions",
+      "parameters": [
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ],
+            "example": "US"
+          },
+          "sample": "US"
+        }
+      ]
+    },
+    {
+      "tool": "get_trade_days",
+      "path": "/v1/market/trade-days",
+      "parameters": [
+        {
+          "name": "market",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ],
+            "default": "US",
+            "example": "US"
+          },
+          "sample": "US"
+        },
+        {
+          "name": "beg_day",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$",
+            "default": "20260201",
+            "example": "20260201"
+          },
+          "sample": "20260201"
+        },
+        {
+          "name": "end_day",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$",
+            "default": "20260228",
+            "example": "20260228"
+          },
+          "sample": "20260228"
+        }
+      ]
+    },
+    {
+      "tool": "get_stock_info",
+      "path": "/v1/market/stock-info",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK,AAPL.US,000001.SZ",
+            "example": "700.HK,AAPL.US,000001.SZ"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_market_metrics",
+      "path": "/v1/market/calc-index",
+      "parameters": [
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "700.HK",
+            "example": "700.HK,AAPL.US"
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_capital_flow",
+      "path": "/v1/market/capital-flow",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "700.HK",
+            "default": "700.HK"
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock",
+              "indices",
+              "crypto",
+              "forex"
+            ],
+            "example": "stock"
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_company_profile",
+      "path": "/v1/fundamentals/profile",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_company_executives",
+      "path": "/v1/fundamentals/executives",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_financials_latest",
+      "path": "/v1/fundamentals/financials/latest",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "IS",
+              "BS",
+              "CF"
+            ]
+          },
+          "sample": "IS"
+        },
+        {
+          "name": "n",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "sample": 2
+        },
+        {
+          "name": "period_type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "default": "q1,q2,q3,q4",
+            "pattern": "^(q1|q2|q3|q4|saf|af)(,(q1|q2|q3|q4|saf|af))*$",
+            "examples": [
+              "q1",
+              "saf",
+              "af",
+              "q1,q2,q3,q4"
+            ]
+          },
+          "sample": "q1,q2,q3,q4"
+        }
+      ]
+    },
+    {
+      "tool": "get_financials_annual",
+      "path": "/v1/fundamentals/financials/annual",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "IS",
+              "BS",
+              "CF"
+            ]
+          },
+          "sample": "IS"
+        },
+        {
+          "name": "n",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "sample": 2
+        }
+      ]
+    },
+    {
+      "tool": "get_financials_ttm",
+      "path": "/v1/fundamentals/financials/ttm",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "IS",
+              "CF"
+            ]
+          },
+          "sample": "IS"
+        }
+      ]
+    },
+    {
+      "tool": "get_segments_latest",
+      "path": "/v1/fundamentals/segments/latest",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "business",
+              "regional"
+            ]
+          },
+          "sample": "business"
+        }
+      ]
+    },
+    {
+      "tool": "get_segments_history",
+      "path": "/v1/fundamentals/segments/history",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "business",
+              "regional"
+            ]
+          },
+          "sample": "business"
+        },
+        {
+          "name": "report",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "qf",
+              "saf",
+              "af"
+            ]
+          },
+          "sample": "qf"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 200
+          },
+          "sample": 200
+        }
+      ]
+    },
+    {
+      "tool": "get_valuation_latest",
+      "path": "/v1/fundamentals/valuation/latest",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_valuation_history",
+      "path": "/v1/fundamentals/valuation/ts",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "granularity",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "monthly"
+            ],
+            "default": "daily"
+          },
+          "sample": "daily"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "tool": "get_industry_peers",
+      "path": "/v1/fundamentals/industry/peers",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_industry_distribution",
+      "path": "/v1/fundamentals/industry/dist",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_industries_rank",
+      "path": "/v1/fundamentals/industries/rank",
+      "parameters": [
+        {
+          "name": "market",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50
+          },
+          "sample": 50
+        }
+      ]
+    },
+    {
+      "tool": "get_industries_tree",
+      "path": "/v1/fundamentals/industries/tree",
+      "parameters": [
+        {
+          "name": "market",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "industry_counter_id",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "sample": "software"
+        }
+      ]
+    },
+    {
+      "tool": "get_dividends",
+      "path": "/v1/fundamentals/dividends",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "dividend_type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "special",
+              "non_cash",
+              "unknown"
+            ]
+          },
+          "sample": "normal"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2026-12-31"
+            ]
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_dividends_ttm",
+      "path": "/v1/fundamentals/dividends/ttm",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "as_of",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "tool": "get_buyback",
+      "path": "/v1/fundamentals/buyback",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_shareholders_latest",
+      "path": "/v1/fundamentals/shareholders/latest",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_shareholders_top",
+      "path": "/v1/fundamentals/shareholders/top",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        }
+      ]
+    },
+    {
+      "tool": "get_shareholder_detail",
+      "path": "/v1/fundamentals/shareholders/detail",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "object_id",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "sample": "452583"
+        }
+      ]
+    },
+    {
+      "tool": "get_fund_holdings_latest",
+      "path": "/v1/fundamentals/fund-holdings/latest",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 200
+          },
+          "sample": 200
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_corporate_actions",
+      "path": "/v1/fundamentals/corp-actions",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2026-12-31"
+            ]
+          },
+          "sample": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "tool": "get_company_news",
+      "path": "/v1/fundamentals/news",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "examples": [
+              "AAPL",
+              "700",
+              "600519",
+              "AAPL.US",
+              "700.HK",
+              "600519.SH"
+            ]
+          },
+          "sample": "AAPL.US"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "stock"
+            ]
+          },
+          "sample": "stock"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50
+          },
+          "sample": 50
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2026-12-31"
+            ]
+          },
+          "sample": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "tool": "get_news_detail",
+      "path": "/v1/fundamentals/news/{news_id}",
+      "parameters": [
+        {
+          "name": "news_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "sample": "6288041"
+        }
+      ]
+    },
+    {
+      "tool": "get_report_calendar",
+      "path": "/v1/fundamentals/calendar/report",
+      "parameters": [
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "AAPL.US",
+              "AAPL.US,700.HK,600519.SH"
+            ]
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_dividend_calendar",
+      "path": "/v1/fundamentals/calendar/dividend",
+      "parameters": [
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "AAPL.US",
+              "AAPL.US,700.HK,600519.SH"
+            ]
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_split_calendar",
+      "path": "/v1/fundamentals/calendar/split",
+      "parameters": [
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "AAPL.US",
+              "AAPL.US,700.HK,600519.SH"
+            ]
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_ipo_calendar",
+      "path": "/v1/fundamentals/calendar/ipo",
+      "parameters": [
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "AAPL.US",
+              "AAPL.US,700.HK,600519.SH"
+            ]
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_other_calendar",
+      "path": "/v1/fundamentals/calendar/other",
+      "parameters": [
+        {
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-01"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date"
+          },
+          "sample": "2026-09-21"
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "macrodata",
+              "closed",
+              "meeting",
+              "merge",
+              "halt_resume",
+              "special_treatment",
+              "special_treatment_start",
+              "special_treatment_end",
+              "listing_status",
+              "listing_suspension",
+              "listing_resumption",
+              "delisting",
+              "lockup_expiry"
+            ]
+          },
+          "sample": "macrodata"
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "US",
+              "HK",
+              "CN"
+            ]
+          },
+          "sample": "US"
+        },
+        {
+          "name": "symbols",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "AAPL.US",
+              "AAPL.US,700.HK,600519.SH"
+            ]
+          },
+          "sample": "AAPL.US,700.HK"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "sample": 100
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample": "opaque+cursor=="
+        }
+      ]
+    },
+    {
+      "tool": "get_market_status",
+      "path": "/v1/fundamentals/market/status",
+      "parameters": []
+    },
+    {
+      "tool": "get_api_key_subscriptions",
+      "path": "/v1/apikeys/subscriptions",
+      "source": "User-supplied APIKey management screenshot, 2026-09-21; not present in original ZIP",
+      "parameters": [
+        {
+          "name": "X-API-Key",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "error_codes": [
+    "1001",
+    "1002",
+    "1004",
+    "1005",
+    "2001",
+    "2002",
+    "2003",
+    "2004",
+    "2005",
+    "2006",
+    "2008",
+    "3001",
+    "3002",
+    "3003",
+    "3004",
+    "3005",
+    "3006",
+    "3007",
+    "3008",
+    "3009",
+    "3010",
+    "3011",
+    "3012",
+    "40001",
+    "4005",
+    "40101",
+    "40404",
+    "40405",
+    "5000",
+    "50001",
+    "5001",
+    "5002",
+    "5003",
+    "5004",
+    "5005",
+    "5006",
+    "AMBIGUOUS_SYMBOL",
+    "INVALID_TOKEN",
+    "PERMISSION_DENIED",
+    "UNAUTHORIZED"
+  ],
+  "errors_sha256": "3057578d0258b79647979c78953abd450096ab344059cfc72239c15dfe162ef0",
+  "excluded_operations": [
+    {
+      "path": "/v1/market/ticker/cn-stock",
+      "reason": "Full-market snapshot excluded by user from MCP scope"
+    },
+    {
+      "path": "/v1/market/ticker/hk-stock",
+      "reason": "Full-market snapshot excluded by user from MCP scope"
+    },
+    {
+      "path": "/v1/market/ticker/us-stock",
+      "reason": "Full-market snapshot excluded by user from MCP scope"
+    }
+  ]
+}

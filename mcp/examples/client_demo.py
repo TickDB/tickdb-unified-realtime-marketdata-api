@@ -27,6 +27,7 @@ from mcp.client.streamable_http import streamablehttp_client
 
 SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8000/mcp")
 TICKDB_KEY = os.getenv("TICKDB_API_KEY", "")
+ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN", "")
 
 
 def _print_result(title: str, result: object) -> None:
@@ -49,6 +50,8 @@ async def main() -> None:
     headers = {}
     if TICKDB_KEY:
         headers["X-TickDB-Key"] = TICKDB_KEY
+    if ACCESS_TOKEN:
+        headers["Authorization"] = f"Bearer {ACCESS_TOKEN}"
 
     print(f"Connecting to TickDB MCP server at {SERVER_URL} ...")
 
@@ -80,9 +83,9 @@ async def main() -> None:
             # --- Demo 3: Order book depth ---
             result = await session.call_tool(
                 "get_order_book",
-                {"symbol": "BTCUSDT", "limit": 5},
+                {"symbol": "BTCUSDT"},
             )
-            _print_result("get_order_book — BTCUSDT top 5 levels", result)
+            _print_result("get_order_book — BTCUSDT market-defined depth", result)
 
             # --- Demo 4: Stock fundamentals ---
             result = await session.call_tool(

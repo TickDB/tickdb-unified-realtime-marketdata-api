@@ -14,11 +14,19 @@ class Settings(BaseSettings):
     # MCP server access control — empty = open access
     mcp_access_token: str = ""
 
+    # Optional, separate OAuth HTTP entry point. Existing transports are unchanged.
+    oauth_enabled: bool = False
+    oauth_public_url: str = ""
+    oauth_encryption_key: str = ""
+    oauth_database_path: str = "data/oauth.sqlite3"
+    oauth_redirect_uris: list[str] = []
+
     # Logging level: DEBUG, INFO, WARNING, ERROR
     log_level: str = "INFO"
 
     # Log file retention: number of days to keep rotated log files
     log_retain_days: int = 7
+    log_dir: str = "logs"
 
     # Transport: "streamable-http" (remote) or "stdio" (local Claude Desktop)
     mcp_transport: str = "streamable-http"
