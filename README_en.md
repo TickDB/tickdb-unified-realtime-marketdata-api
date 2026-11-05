@@ -427,11 +427,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 cp .env.example .env
-# Edit .env and set TICKDB_API_KEY, or supply a Key in the client header
+# Leave the server Key empty; clients supply their own X-TickDB-Key
 python main.py
 ```
 
-The local endpoint is `http://localhost:8000/mcp`. See the [self-hosting guide](mcp/docs/en/DEPLOYMENT.md) for Docker and HTTPS OAuth configuration.
+The server binds only to local `127.0.0.1:8000` by default, with endpoint `http://localhost:8000/mcp`; clients supply their own `X-TickDB-Key`. A shared server Key also requires `MCP_ACCESS_TOKEN` and the matching client Bearer token; anonymous HTTP requests cannot borrow the server Key. See the [self-hosting guide](mcp/docs/en/DEPLOYMENT.md) for Docker and HTTPS OAuth configuration.
 
 **Public hosted endpoints (optional, no self-hosting needed):**
 
@@ -456,7 +456,7 @@ See the client setup guide below for individual client settings and Claude Deskt
 
 **The MCP server is open source**, located in the [`mcp/`](mcp/) directory of this repo.
 
-**mcp/ at a glance**: v0.2.3 · 43 MCP tools · Python 3.11+ · Docker-ready · automated tests · MIT license · CI-validated
+**mcp/ at a glance**: v0.2.4 · 43 MCP tools · Python 3.11+ · Docker-ready · automated tests · MIT license · CI-validated
 
 | Document | Link |
 |----------|------|

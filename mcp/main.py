@@ -1,7 +1,7 @@
 """Entry point for the TickDB MCP server.
 
 Usage:
-    python main.py                          # HTTP server on port 8000
+    python main.py                          # HTTP server on 127.0.0.1:8000
     MCP_PORT=8123 python main.py            # custom port
     MCP_TRANSPORT=stdio python main.py      # stdio for Claude Desktop
 """
@@ -36,6 +36,11 @@ def main() -> None:
         logger.info("Running in stdio mode (local)")
         create_mcp().run(transport="stdio")
     else:
+        if settings.tickdb_api_key and not settings.mcp_access_token:
+            logger.warning(
+                "HTTP shared API key access is disabled without MCP_ACCESS_TOKEN; "
+                "clients must provide their own X-TickDB-Key."
+            )
         logger.info("Running in HTTP mode on %s:%d", settings.mcp_host, settings.mcp_port)
         app = create_http_app()
         uvicorn.run(app, host=settings.mcp_host, port=settings.mcp_port)

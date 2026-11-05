@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-ARG RELEASE_VERSION=0.2.3
+ARG RELEASE_VERSION=0.2.4
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.version="$RELEASE_VERSION" \
       org.opencontainers.image.revision="$VCS_REF"

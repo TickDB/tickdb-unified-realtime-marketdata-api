@@ -2,7 +2,7 @@
 
 **Other languages:** [简体中文](../../DEPLOYMENT.md) · [繁體中文](../tw/DEPLOYMENT.md)
 
-This repository's `mcp/` directory is a standalone open-source Python MCP server. v0.2.3 exposes 43 tools (13 market + 29 company fundamentals/events + 1 API key subscription), covering forex, metals, indices, US/HK/CN stocks, CN/HK futures, and crypto.
+This repository's `mcp/` directory is a standalone open-source Python MCP server. v0.2.4 exposes 43 tools (13 market + 29 company fundamentals/events + 1 API key subscription), covering forex, metals, indices, US/HK/CN stocks, CN/HK futures, and crypto.
 
 Requires Python 3.11+ or Docker on Linux. All commands below use Bash. Market queries and OAuth key validation both require access to `api.tickdb.ai`. HTTP listens on port 8000 by default. Public OAuth requires an HTTPS domain.
 
@@ -20,13 +20,13 @@ cp .env.example .env
 
 ### Configure keys and the service
 
-Edit `.env` as needed. The `X-TickDB-Key` request header takes priority; `TICKDB_API_KEY` is a server fallback. Without a server key, clients must supply their own. Set `MCP_ACCESS_TOKEN` to protect public header access and have clients send `Authorization: Bearer <token>`.
+Leave `TICKDB_API_KEY` and `MCP_ACCESS_TOKEN` empty by default; clients supply their own `X-TickDB-Key`. HTTP binds locally. For remote access, explicitly configure a bind address or HTTPS reverse proxy while retaining the shared-Key authentication described below.
 
 ```dotenv
 TICKDB_API_KEY=
 MCP_ACCESS_TOKEN=
 MCP_TRANSPORT=streamable-http
-MCP_HOST=0.0.0.0
+MCP_HOST=127.0.0.1
 MCP_PORT=8000
 MCP_STATELESS_HTTP=true
 MCP_SESSION_LOG_TTL_SECONDS=3600
@@ -36,6 +36,15 @@ LOG_RETAIN_DAYS=7
 LOG_DIR=logs
 OAUTH_ENABLED=false
 ```
+
+To use a shared server Key, set both values in the private `.env`. Clients send `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN` and may omit `X-TickDB-Key`:
+
+```dotenv
+TICKDB_API_KEY=YOUR_TICKDB_API_KEY
+MCP_ACCESS_TOKEN=YOUR_MCP_ACCESS_TOKEN
+```
+
+Use a strong random access token distinct from the TickDB API Key. When configured, every `/mcp` request requires the correct Bearer token, including requests carrying their own Key. If a server Key is configured without an access token, HTTP requests without their own Key return 401, including local and reverse-proxied requests.
 
 ### Start and verify
 
@@ -54,12 +63,14 @@ For local stdio, set `MCP_TRANSPORT=stdio` and `TICKDB_API_KEY` in the client pr
 
 ## Docker: build from public source
 
+`-e MCP_HOST=0.0.0.0` sets the container's internal bind address and overrides the local default in `.env`; the host port remains bound to `127.0.0.1`. Public reverse proxies must still follow the shared-Key authentication rules.
+
 Build from `mcp/`. On first installation, copy `.env.example` to `.env` and configure it as above. The build context excludes `.env`, virtual environments, data, and logs. Run:
 
 ```bash
-docker build -t tickdb-mcp:0.2.3 .
+docker build -t tickdb-mcp:0.2.4 .
 docker volume create tickdb-mcp-data
-docker run -d --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -v tickdb-mcp-data:/app/data --name tickdb-mcp tickdb-mcp:0.2.3
+docker run -d --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data --name tickdb-mcp tickdb-mcp:0.2.4
 docker logs -f tickdb-mcp
 ```
 
@@ -94,6 +105,8 @@ OAUTH_REDIRECT_URIS=["https://chatgpt.com/connector_platform_oauth_redirect","ht
 Restart the local process, or recreate Docker with the same `.env` and data volume. Connect clients to `https://mcp.example.com/oauth`, select OAuth, leave client ID/secret blank, and validate/authorize your own key on the consent page. See the [OAuth configuration](README.md#oauth-setup) for protocol, discovery, and callback details.
 
 ## HTTPS / Nginx reverse proxy
+
+Enabling OAuth does not automatically protect `/mcp`. When proxying the entire service publicly, `/mcp` still follows its separate authentication rules; anonymous HTTP requests cannot use the shared server Key.
 
 Obtain a certificate for your domain and proxy the entire origin without rewriting paths, including `/mcp`, `/oauth`, authorization metadata, registration, consent, token, and revocation routes:
 
@@ -151,6 +164,8 @@ Use the public source's `mcp/Dockerfile`, or select `mcp/` as the build root. Co
 
 ## Upgrades and persistence
 
+When upgrading an HTTP deployment that previously set only `TICKDB_API_KEY`, requests without a request Key now return 401. Add a strong random `MCP_ACCESS_TOKEN` and the matching client Bearer token, or have clients supply their own `X-TickDB-Key`. Existing `.env` files are not rewritten automatically. If yours still sets `MCP_HOST=0.0.0.0`, the new authentication rule still blocks anonymous shared-Key use; set it to `127.0.0.1` if only local access is needed.
+
 1. Back up the existing `.env`, OAuth encryption key, and database. Use SQLite's backup API or stop the service before copying the database to obtain a consistent backup.
 2. Replace source and run `python -m pip install -e .` in the existing virtual environment. For Docker, build a new image and replace the container/image while keeping the same configuration and data volume.
 3. Retain `OAUTH_ENCRYPTION_KEY`, database file/path, `OAUTH_PUBLIC_URL`, redirect allowlist, registered clients, and valid authorizations. Do not regenerate keys, delete the database, or reset authorization.
@@ -160,10 +175,10 @@ Use the public source's `mcp/Dockerfile`, or select `mcp/` as the build root. Co
 
 | Variable | Default | Description |
 |---|---|---|
-| `TICKDB_API_KEY` | empty | Fallback server key; unused by OAuth |
-| `MCP_ACCESS_TOKEN` | empty | Fixed bearer token for header-based `/mcp` access only |
+| `TICKDB_API_KEY` | empty | Server-wide Key; HTTP fallback requires Bearer authentication; request-header Key takes priority; unused by OAuth |
+| `MCP_ACCESS_TOKEN` | empty | Fixed Bearer token for `/mcp`; when empty, requests can use only their own Key, not the server Key |
 | `MCP_TRANSPORT` | `streamable-http` | HTTP or local stdio |
-| `MCP_HOST` | `0.0.0.0` | Bind address |
+| `MCP_HOST` | `127.0.0.1` | Bind address |
 | `MCP_PORT` | `8000` | Listen port |
 | `MCP_STATELESS_HTTP` | `true` | Stateless HTTP avoids retaining abandoned sessions |
 | `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | Session-label log cache TTL, in seconds |
@@ -179,6 +194,7 @@ Use the public source's `mcp/Dockerfile`, or select `mcp/` as the build root. Co
 
 ## Troubleshooting
 
+- HTTP 401: send the correct Bearer token if `MCP_ACCESS_TOKEN` is configured. If only a shared server Key is configured, also configure an access token or have the client supply its own `X-TickDB-Key`.
 - `Address already in use`: change `MCP_PORT` in `.env` and update client URLs or the proxy target.
 - `No TickDB API key provided` / `1001`: check the client `X-TickDB-Key` or server `TICKDB_API_KEY`. `1005` means the key expired.
 - OAuth startup failure: verify HTTPS origin, Fernet key, redirect JSON, and database permissions. Existing databases require their original key and origin.

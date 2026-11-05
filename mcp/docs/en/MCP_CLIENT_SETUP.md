@@ -2,13 +2,13 @@
 
 **Other languages:** [简体中文](../../MCP_CLIENT_SETUP.md) · [繁體中文](../tw/MCP_CLIENT_SETUP.md)
 
-v0.2.3 exposes 43 tools: 13 market tools, 29 company fundamentals and event tools, and 1 API key subscription tool. Supported assets include forex, precious metals, indices, US/HK/CN stocks, Chinese and Hong Kong futures, and crypto. Availability depends on the market, disclosure dates, and your subscription.
+v0.2.4 exposes 43 tools: 13 market tools, 29 company fundamentals and event tools, and 1 API key subscription tool. Supported assets include forex, precious metals, indices, US/HK/CN stocks, Chinese and Hong Kong futures, and crypto. Availability depends on the market, disclosure dates, and your subscription.
 
 ## Choose a connection
 
 | Mode | Endpoint | Authentication |
 |---|---|---|
-| Self-hosted HTTP | `http://localhost:8000/mcp` or `https://mcp.example.com/mcp` | `X-TickDB-Key` or a server-wide key |
+| Self-hosted HTTP | `http://localhost:8000/mcp` or `https://mcp.example.com/mcp` | `X-TickDB-Key`, or fixed Bearer + server-wide Key |
 | Self-hosted OAuth | `https://mcp.example.com/oauth` | Authorize and bind your own TickDB API key |
 | Public hosted HTTP | `https://mcp.tickdb.ai/` | `X-TickDB-Key` |
 | Public hosted OAuth | `https://mcp.tickdb.ai/oauth` | Browser OAuth authorization |
@@ -18,7 +18,7 @@ The HTTP examples below use a self-hosted URL. Replace it with `https://mcp.tick
 
 ## API keys and authorization
 
-Register at [tickdb.ai](https://tickdb.ai) for a valid API key. HTTP `/mcp` uses the per-request `X-TickDB-Key` first, then server `TICKDB_API_KEY` when no header is provided. Stdio uses the environment key. OAuth `/oauth` uses only the key explicitly bound during authorization; it does not accept `X-TickDB-Key` or fall back to the server key.
+Register at [tickdb.ai](https://tickdb.ai) for a valid API key. HTTP `/mcp` uses `X-TickDB-Key` first and falls back to server `TICKDB_API_KEY` only after fixed Bearer authentication. Stdio uses the environment Key without an access token. OAuth `/oauth` uses only the key explicitly bound during authorization; it does not accept `X-TickDB-Key` or fall back to the server key.
 
 Header connections do not persist users' keys. OAuth encrypts and persists key bindings for subsequent calls and authorization refresh. Do not put your API key in OAuth client ID/secret fields or chat messages.
 
@@ -122,6 +122,10 @@ Add a remote server in **Settings → AI → MCP Servers**, or edit `context_ser
 Open **Settings → MCP Servers → Add**. Set name to `tickdb`, type to Streamable HTTP, URL to `https://mcp.example.com/mcp`, and header to `X-TickDB-Key: YOUR_API_KEY`. If your server requires an access token, also add `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN`.
 
 ## Self-hosted access tokens
+
+A shared server Key is available only to HTTP requests authenticated with `MCP_ACCESS_TOKEN`. If a shared Key is configured without an access token, requests without their own `X-TickDB-Key` return 401, including initialization and tool discovery. The access token and TickDB API Key are different credentials. With both the shared server Key and access token empty, anonymous connection and tool discovery are available, but market queries still need the caller's own Key.
+
+Enabling OAuth does not automatically protect `/mcp`. When proxying the entire service publicly, `/mcp` still follows its separate authentication rules; anonymous HTTP requests cannot use the shared server Key.
 
 When the server sets `MCP_ACCESS_TOKEN`, add `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN` alongside the key header in HTTP client configuration. For local HTTP use `http://localhost:8000/mcp`; use HTTPS for public servers. The OAuth entry point uses OAuth bearer tokens independently of this fixed access token.
 

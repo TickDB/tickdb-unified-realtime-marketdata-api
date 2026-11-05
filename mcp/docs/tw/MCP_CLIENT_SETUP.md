@@ -2,13 +2,13 @@
 
 **其他語言：** [简体中文](../../MCP_CLIENT_SETUP.md) · [English](../en/MCP_CLIENT_SETUP.md)
 
-v0.2.3 提供 43 個工具：13 個行情工具、29 個公司財務與事件工具、1 個 API Key 訂閱工具。支援外匯、貴金屬、指數、美股、港股、A 股、中國及香港期貨、加密貨幣。實際資料取決於市場、披露時間和方案權限。
+v0.2.4 提供 43 個工具：13 個行情工具、29 個公司財務與事件工具、1 個 API Key 訂閱工具。支援外匯、貴金屬、指數、美股、港股、A 股、中國及香港期貨、加密貨幣。實際資料取決於市場、披露時間和方案權限。
 
 ## 選擇接入方式
 
 | 方式 | 位址 | 驗證 |
 |---|---|---|
-| 自部署 HTTP | `http://localhost:8000/mcp` 或 `https://mcp.example.com/mcp` | `X-TickDB-Key`，或伺服器統一 Key |
+| 自部署 HTTP | `http://localhost:8000/mcp` 或 `https://mcp.example.com/mcp` | `X-TickDB-Key`，或固定 Bearer + 伺服器統一 Key |
 | 自部署 OAuth | `https://mcp.example.com/oauth` | 網頁授權綁定自己的 TickDB API Key |
 | 公開託管 HTTP | `https://mcp.tickdb.ai/` | `X-TickDB-Key` |
 | 公開託管 OAuth | `https://mcp.tickdb.ai/oauth` | 網頁 OAuth 授權 |
@@ -18,7 +18,7 @@ v0.2.3 提供 43 個工具：13 個行情工具、29 個公司財務與事件工
 
 ## API Key 與授權
 
-先在 [tickdb.ai](https://tickdb.ai) 註冊並取得有效 API Key。HTTP `/mcp` 接入優先使用 `X-TickDB-Key` 請求標頭，未提供時使用伺服器 `TICKDB_API_KEY`；stdio 使用環境變數。OAuth `/oauth` 僅使用使用者確認授權後綁定的 Key，不接受 `X-TickDB-Key`，不退回伺服器統一 Key。
+先在 [tickdb.ai](https://tickdb.ai) 註冊並取得有效 API Key。HTTP `/mcp` 優先使用 `X-TickDB-Key`，未提供時僅在通過固定 Bearer 驗證後使用伺服器 `TICKDB_API_KEY`；stdio 使用環境 Key，無需存取 Token。OAuth `/oauth` 僅使用使用者確認授權後綁定的 Key，不接受 `X-TickDB-Key`，不退回伺服器統一 Key。
 
 Header 接入不持久化保存使用者 Key；OAuth 接入會加密保存 Key 綁定，以便後續呼叫和更新授權。不要將 API Key 填入 OAuth 客戶端 ID/Secret 或聊天訊息。
 
@@ -122,6 +122,10 @@ http_headers = { "X-TickDB-Key" = "YOUR_API_KEY" }
 進入 **設定 → MCP 伺服器 → 新增**，名稱填 `tickdb`，類型選擇 Streamable HTTP，URL 填 `https://mcp.example.com/mcp`，Header 填 `X-TickDB-Key: YOUR_API_KEY`。若服務設定了存取 Token，另加 `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN`。
 
 ## 自部署存取 Token
+
+伺服器共用 Key 僅供通過 `MCP_ACCESS_TOKEN` 驗證的 HTTP 請求使用。設定共用 Key 卻未設定存取 Token 時，不帶自己 `X-TickDB-Key` 的請求回傳 401；初始化和工具探索也適用。存取 Token 與 TickDB API Key 是不同憑證。伺服器共用 Key 與存取 Token 均為空時，可匿名連線和探索工具，但行情呼叫仍需自己的 Key。
+
+啟用 OAuth 不會自動保護 `/mcp`。公開代理整個服務時，`/mcp` 仍按獨立驗證規則執行；匿名 HTTP 請求不能使用伺服器共用 Key。
 
 若伺服器設定了 `MCP_ACCESS_TOKEN`，在上述 HTTP 客戶端的請求標頭中同時加入 `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN`。本地 HTTP 將 URL 改為 `http://localhost:8000/mcp`；公網服務使用 HTTPS。OAuth 入口的 Authorization 使用 OAuth 令牌，與該固定存取 Token 獨立。
 

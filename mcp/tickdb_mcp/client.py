@@ -2,7 +2,8 @@
 
 Key priority (highest → lowest):
   1. X-TickDB-Key request header  — user's own key, injected by middleware
-  2. TICKDB_API_KEY env var        — server-wide key set by operator
+  2. TICKDB_API_KEY env var        — server-wide key set by operator; HTTP
+                                    middleware requires matching Bearer authentication
 
 A valid API key is required. Register at https://tickdb.ai to obtain one.
 """

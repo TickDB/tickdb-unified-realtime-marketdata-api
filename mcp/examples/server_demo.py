@@ -45,7 +45,7 @@ def demo_config() -> None:
     print(f"  Port      : {settings.mcp_port}")
     print(f"  Log level : {settings.log_level}")
     print(f"  API key   : {'configured' if settings.tickdb_api_key else 'not set (per-request header required)'}")
-    print(f"  Auth token: {'enabled' if settings.mcp_access_token else 'disabled (open access)'}")
+    print(f"  Auth token: {'enabled' if settings.mcp_access_token else 'not set (HTTP requires caller key)'}")
 
 
 async def demo_tool_call_mock() -> None:

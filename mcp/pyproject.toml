@@ -1,6 +1,6 @@
 [project]
 name = "tickdb-mcp"
-version = "0.2.3"
+version = "0.2.4"
 description = "TickDB market data and company fundamentals MCP server"
 requires-python = ">=3.11"
 dependencies = [

@@ -427,11 +427,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 cp .env.example .env
-# 編輯 .env，填寫 TICKDB_API_KEY；也可由客戶端透過請求標頭提供 Key
+# 保持伺服器 Key 為空，由客戶端透過 X-TickDB-Key 提供自己的 Key
 python main.py
 ```
 
-本地服務位址為 `http://localhost:8000/mcp`。Docker 和 HTTPS OAuth 設定見[自部署指南](mcp/docs/tw/DEPLOYMENT.md)。
+服務預設僅監聽本機 `127.0.0.1:8000`，端點為 `http://localhost:8000/mcp`；客戶端透過 `X-TickDB-Key` 提供自己的 Key。若要使用伺服器共用 Key，須同時設定 `MCP_ACCESS_TOKEN`，客戶端攜帶對應 Bearer；匿名 HTTP 請求不能借用伺服器 Key。Docker 和 HTTPS OAuth 設定見[自部署指南](mcp/docs/tw/DEPLOYMENT.md)。
 
 **公開託管端點（可選，無需自部署）：**
 
@@ -456,7 +456,7 @@ python main.py
 
 **MCP 服務端已開源**，代碼位於本倉庫 [`mcp/`](mcp/) 目錄。
 
-**mcp/ 概覽**：v0.2.3 · 43 個 MCP 工具 · Python 3.11+ · Docker 就緒 · 自動化測試 · MIT 授權條款 · CI 持續驗證
+**mcp/ 概覽**：v0.2.4 · 43 個 MCP 工具 · Python 3.11+ · Docker 就緒 · 自動化測試 · MIT 授權條款 · CI 持續驗證
 
 | 文件 | 連結 |
 |------|------|

@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-lightgrey.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](../../LICENSE)
 
-> This directory contains the MCP server implementation for [tickdb-unified-realtime-marketdata-api](../../../), version **v0.2.3**, deployable as a standalone Python package or Docker container.
+> This directory contains the MCP server implementation for [tickdb-unified-realtime-marketdata-api](../../../), version **v0.2.4**, deployable as a standalone Python package or Docker container.
 
 **TickDB-MCP** connects AI assistants through the [Model Context Protocol](https://modelcontextprotocol.io) with **43 tools: 13 market data tools, 29 company financials and fundamentals tools, and 1 API Key subscription tool**. Calls use the [TickDB REST API](https://tickdb.ai); this service does not provide WebSocket streaming subscriptions.
 
@@ -24,11 +24,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 cp .env.example .env
-# Edit .env and set TICKDB_API_KEY, or supply a Key in the client header
+# Leave the server Key empty; clients supply their own X-TickDB-Key
 python main.py
 ```
 
-The server listens on port 8000 by default. A client that supports HTTP MCP can connect to the local endpoint:
+The server binds only to local `127.0.0.1:8000` by default. A client that supports HTTP MCP can connect to the local endpoint:
 
 ```json
 {
@@ -44,7 +44,16 @@ The server listens on port 8000 by default. A client that supports HTTP MCP can 
 }
 ```
 
-The local HTTP endpoint is `http://localhost:8000/mcp`; the public hosted header endpoint is `https://mcp.tickdb.ai/`. Omit `X-TickDB-Key` when the server supplies a shared Key. If `MCP_ACCESS_TOKEN` is set, also add `Authorization: Bearer <token>`.
+The local HTTP endpoint is `http://localhost:8000/mcp`; the public hosted header endpoint is `https://mcp.tickdb.ai/`. Clients supply their own `X-TickDB-Key` by default. With both the shared server Key and access token empty, anonymous initialization and tool discovery are available, but market queries still need a valid Key.
+
+To use a shared server Key, set both values in the private `.env`. Clients send `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN` and may omit `X-TickDB-Key`:
+
+```dotenv
+TICKDB_API_KEY=YOUR_TICKDB_API_KEY
+MCP_ACCESS_TOKEN=YOUR_MCP_ACCESS_TOKEN
+```
+
+Use a strong random access token distinct from the TickDB API Key. When configured, every `/mcp` request requires the correct Bearer token, including requests carrying their own Key. If a server Key is configured without an access token, HTTP requests without their own Key return 401, including local and reverse-proxied requests.
 
 Claude Desktop local mode uses `MCP_TRANSPORT=stdio`, a Python command, and the `TICKDB_API_KEY` environment variable. See the [client setup guide](MCP_CLIENT_SETUP.md).
 
@@ -55,6 +64,8 @@ Claude Desktop local mode uses `MCP_TRANSPORT=stdio`, a Python command, and the 
 ChatGPT / Claude web clients connect through OAuth. Use `https://mcp.tickdb.ai/oauth` for the public hosted service or `https://your-domain/oauth` for your deployment. Users verify their own TickDB API Key on the consent page and explicitly approve access; no custom header is required.
 
 OAuth is **disabled by default**. Enable it on a single instance with public HTTPS and persistent local SQLite storage. Header-based `/mcp` access and stdio continue to provide the same 43 tools.
+
+Enabling OAuth does not automatically protect `/mcp`. When proxying the entire service publicly, `/mcp` still follows its separate authentication rules; anonymous HTTP requests cannot use the shared server Key.
 
 ### Configuration and persistence
 
@@ -76,7 +87,15 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 
 `OAUTH_PUBLIC_URL` must be an HTTPS origin without a path, query, or fragment. Redirect URIs must match their complete URLs exactly; wildcards and arbitrary HTTP loopback callbacks are unsupported. `.env.example` includes the ChatGPT callback only. Add the Claude callback when enabling Claude web access; if a client shows a different callback, add that exact URL.
 
-The service must be able to write the local database directory. For Docker, use `/app/data/oauth.sqlite3` and retain the `/app/data` volume shown under [Docker Deployment](#docker-deployment). Keep configuration, encryption keys, and databases outside Git and images. Network-shared SQLite is not a supported multi-instance store.
+The service must be able to write the local database directory. For Docker, use `/app/data/oauth.sqlite3` and run these commands from `mcp/`:
+
+```bash
+docker build -t tickdb-mcp:0.2.4 .
+docker volume create tickdb-mcp-data
+docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.4
+```
+
+Keep configuration, encryption keys, and databases outside Git and images. Network-shared SQLite is not a supported multi-instance store.
 
 ### HTTPS reverse proxy and discovery
 
@@ -196,10 +215,10 @@ Copy `.env.example` to a private local `.env`. Dependencies are managed in `pypr
 
 | Variable | Default | Description |
 |---|---|---|
-| `TICKDB_API_KEY` | Empty | Server-wide Key; a request-header Key takes priority |
-| `MCP_ACCESS_TOKEN` | Empty | Static Bearer access token for header-based `/mcp` access; empty disables this gate |
+| `TICKDB_API_KEY` | Empty | Server-wide Key; HTTP fallback requires Bearer authentication; request-header Key takes priority; unused by OAuth |
+| `MCP_ACCESS_TOKEN` | Empty | Fixed Bearer token for `/mcp`; when empty, requests can use only their own Key, not the server Key |
 | `MCP_TRANSPORT` | `streamable-http` | Can be set to `stdio` |
-| `MCP_HOST` | `0.0.0.0` | HTTP bind address |
+| `MCP_HOST` | `127.0.0.1` | HTTP bind address |
 | `MCP_PORT` | `8000` | HTTP listen port |
 | `MCP_STATELESS_HTTP` | `true` | Avoid retaining abandoned HTTP sessions |
 | `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | Retention seconds for lifecycle-log session IDs |
@@ -213,7 +232,7 @@ Copy `.env.example` to a private local `.env`. Dependencies are managed in `pypr
 | `OAUTH_DATABASE_PATH` | `data/oauth.sqlite3` | Persistent SQLite path |
 | `OAUTH_REDIRECT_URIS` | `[]` | Exact callback allowlist; the example configuration includes a ChatGPT callback |
 
-Logging always uses stderr, leaving stdout available for the stdio protocol. A writable directory also enables daily rotating files; if file logging is unavailable, stderr logging continues. HTTP header Key priority is `X-TickDB-Key` → `TICKDB_API_KEY`; stdio uses the environment Key, and OAuth uses the authorized Key binding.
+Logging always uses stderr, leaving stdout available for the stdio protocol. A writable directory also enables daily rotating files; if file logging is unavailable, stderr logging continues. HTTP uses `X-TickDB-Key` first and falls back to `TICKDB_API_KEY` only after fixed Bearer authentication. Stdio uses the environment Key without an access token; OAuth uses the authorized Key binding.
 
 A regular installation with `python -m pip install .` also provides the `tickdb-mcp` command.
 
@@ -243,17 +262,19 @@ mcp/
 └── docs/
 ```
 
-CI lives in the parent repository at [../../../.github/workflows/mcp-ci.yml](../../../.github/workflows/mcp-ci.yml) and runs lint, unit tests, and a Docker build.
+CI lives in the parent repository at [../../../.github/workflows/mcp-ci.yml](../../../.github/workflows/mcp-ci.yml) and runs lint, unit tests, installed-wheel verification, and a Docker build.
 
 ## Docker Deployment
+
+`-e MCP_HOST=0.0.0.0` sets the container's internal bind address and overrides the local default in `.env`; the host port remains bound to `127.0.0.1`. Public reverse proxies must still follow the shared-Key authentication rules.
 
 From the repository root, enter `mcp/` and build directly. Run:
 
 ```bash
 cd mcp
-docker build -t tickdb-mcp:0.2.3 .
+docker build -t tickdb-mcp:0.2.4 .
 docker volume create tickdb-mcp-data
-docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.3
+docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.4
 ```
 
 The build uses this directory's source and Dockerfile; optional `RELEASE_VERSION` and `VCS_REF` build arguments set OCI image labels. Connect locally at `http://localhost:8000/mcp`; use an HTTPS reverse proxy for remote or OAuth access. The container works in `/app`, so `data/oauth.sqlite3` also resolves inside the persistent `/app/data` volume. Retain the same volume and encryption key for OAuth; see [OAuth configuration](#oauth-setup). Recreate the container after changing `.env`; `docker restart` does not update injected environment variables. See the [deployment guide](DEPLOYMENT.md) for background services and cloud hosting.

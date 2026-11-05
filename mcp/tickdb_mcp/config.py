@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     # TickDB API key — required; register at https://tickdb.ai to obtain one
     tickdb_api_key: str = ""
 
-    # MCP server access control — empty = open access
+    # HTTP access control — required to use the server-wide API key over HTTP.
+    # Without a token, HTTP callers must supply their own X-TickDB-Key.
     mcp_access_token: str = ""
 
     # Optional, separate OAuth HTTP entry point. Existing transports are unchanged.
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
 
     # Transport: "streamable-http" (remote) or "stdio" (local Claude Desktop)
     mcp_transport: str = "streamable-http"
-    mcp_host: str = "0.0.0.0"
+    mcp_host: str = "127.0.0.1"
     mcp_port: int = 8000
 
     # Streamable HTTP session behavior. This server does not keep per-session

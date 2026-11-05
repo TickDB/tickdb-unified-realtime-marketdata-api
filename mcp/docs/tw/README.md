@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-lightgrey.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](../../LICENSE)
 
-> 本目錄是 [tickdb-unified-realtime-marketdata-api](../../../) 倉庫的 MCP 服務端實作，目前版本 **v0.2.3**，可作為 Python 套件或 Docker 容器獨立部署。
+> 本目錄是 [tickdb-unified-realtime-marketdata-api](../../../) 倉庫的 MCP 服務端實作，目前版本 **v0.2.4**，可作為 Python 套件或 Docker 容器獨立部署。
 
 **TickDB-MCP** 透過 [Model Context Protocol](https://modelcontextprotocol.io) 為 AI 助理提供 **43 個工具：13 個行情工具、29 個公司財務與基本面工具、1 個 API Key 訂閱查詢工具**。工具呼叫由 [TickDB REST API](https://tickdb.ai) 提供資料；本服務不提供 WebSocket 串流訂閱。
 
@@ -24,11 +24,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 cp .env.example .env
-# 編輯 .env，填寫 TICKDB_API_KEY；也可由客戶端透過請求標頭提供 Key
+# 保持伺服器 Key 為空，由客戶端透過 X-TickDB-Key 提供自己的 Key
 python main.py
 ```
 
-服務預設監聽連接埠 8000。支援 HTTP MCP 的客戶端可連接本地端點：
+服務預設僅監聽本機 `127.0.0.1:8000`。支援 HTTP MCP 的客戶端可連接本地端點：
 
 ```json
 {
@@ -44,7 +44,16 @@ python main.py
 }
 ```
 
-本地 HTTP 端點為 `http://localhost:8000/mcp`；公開託管請求標頭端點為 `https://mcp.tickdb.ai/`。已設定伺服器統一 Key 時，可省略範例中的 `X-TickDB-Key`。若設定 `MCP_ACCESS_TOKEN`，客戶端還須加入 `Authorization: Bearer <token>`。
+本地 HTTP 端點為 `http://localhost:8000/mcp`；公開託管請求標頭端點為 `https://mcp.tickdb.ai/`。預設由客戶端透過 `X-TickDB-Key` 提供自己的 Key。伺服器共用 Key 與存取 Token 均為空時，匿名初始化與工具探索可用，但行情呼叫仍需有效 Key。
+
+使用伺服器共用 Key 時，在私有 `.env` 中同時設定以下兩項，客戶端改用 `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN`，可省略 `X-TickDB-Key`：
+
+```dotenv
+TICKDB_API_KEY=YOUR_TICKDB_API_KEY
+MCP_ACCESS_TOKEN=YOUR_MCP_ACCESS_TOKEN
+```
+
+存取 Token 應使用隨機強值，與 TickDB API Key 不同。設定存取 Token 後，所有 `/mcp` 請求都須攜帶正確 Bearer，包括自帶 Key 的客戶端。設定伺服器 Key 卻未設定存取 Token 時，不帶自己 Key 的 HTTP 請求回傳 401，即使來自本機或反向代理也不例外。
 
 Claude Desktop 本地模式使用 `MCP_TRANSPORT=stdio`、Python 命令及 `TICKDB_API_KEY` 環境變數，詳見 [客戶端接入指南](MCP_CLIENT_SETUP.md)。
 
@@ -54,6 +63,8 @@ Claude Desktop 本地模式使用 `MCP_TRANSPORT=stdio`、Python 命令及 `TICK
 ChatGPT / Claude 網頁端使用 OAuth 連線。公開託管 URL 為 `https://mcp.tickdb.ai/oauth`；自部署使用 `https://你的網域/oauth`。使用者在授權頁面驗證自己的 TickDB API Key 並確認授權，無需自訂請求標頭。
 
 OAuth **預設關閉**，啟用時使用單實例服務、持久化本地 SQLite 和公開 HTTPS。既有 `/mcp` 請求標頭接入與 stdio 模式仍可使用相同的 43 個工具。
+
+啟用 OAuth 不會自動保護 `/mcp`。公開代理整個服務時，`/mcp` 仍按獨立驗證規則執行；匿名 HTTP 請求不能使用伺服器共用 Key。
 
 ### 設定與持久化
 
@@ -78,9 +89,9 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 Python 部署使用可寫的本地資料庫路徑。Docker 部署將資料庫路徑改為 `/app/data/oauth.sqlite3`，並在 `mcp/` 中執行。執行以下命令：
 
 ```bash
-docker build -t tickdb-mcp:0.2.3 .
+docker build -t tickdb-mcp:0.2.4 .
 docker volume create tickdb-mcp-data
-docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.3
+docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.4
 ```
 
 設定、資料庫與金鑰須保存在 Git 和映像之外。SQLite 網路共享不適合作為多實例儲存。
@@ -201,10 +212,10 @@ server {
 
 | 變數 | 預設值 | 說明 |
 |---|---|---|
-| `TICKDB_API_KEY` | 空 | 伺服器統一 Key；請求標頭 Key 優先 |
-| `MCP_ACCESS_TOKEN` | 空 | 標頭接入 `/mcp` 的靜態 Bearer 存取 Token；空時無此存取限制 |
+| `TICKDB_API_KEY` | 空 | 伺服器統一 Key；HTTP 回退使用須通過 Bearer 驗證，請求標頭 Key 優先；OAuth 不使用 |
+| `MCP_ACCESS_TOKEN` | 空 | `/mcp` 的固定 Bearer Token；空時僅允許使用請求自己的 Key，不能借用伺服器 Key |
 | `MCP_TRANSPORT` | `streamable-http` | 可設為 `stdio` |
-| `MCP_HOST` | `0.0.0.0` | HTTP 監聽位址 |
+| `MCP_HOST` | `127.0.0.1` | HTTP 監聽位址 |
 | `MCP_PORT` | `8000` | HTTP 監聽連接埠 |
 | `MCP_STATELESS_HTTP` | `true` | 避免保留廢棄的 HTTP 工作階段 |
 | `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | 生命週期日誌工作階段 ID 保留秒數 |
@@ -218,7 +229,7 @@ server {
 | `OAUTH_DATABASE_PATH` | `data/oauth.sqlite3` | 持久化 SQLite 路徑 |
 | `OAUTH_REDIRECT_URIS` | `[]` | 精確回呼白名單；範例設定含 ChatGPT 回呼 |
 
-日誌寫入 stderr，確保 stdio 協定的 stdout 可用；目錄可寫時同時輸出每日輪替檔案，檔案日誌不可用時繼續使用 stderr。標頭接入的 Key 優先序為 `X-TickDB-Key` → `TICKDB_API_KEY`，stdio 使用環境 Key；OAuth 使用授權綁定的 Key。
+日誌寫入 stderr，確保 stdio 協定的 stdout 可用；目錄可寫時同時輸出每日輪替檔案，檔案日誌不可用時繼續使用 stderr。HTTP 優先使用 `X-TickDB-Key`，僅在固定 Bearer 驗證通過後回退到 `TICKDB_API_KEY`；stdio 使用環境 Key，無需存取 Token；OAuth 使用授權綁定的 Key。
 
 也可用 `python -m pip install .` 一般安裝，隨後執行 `tickdb-mcp`。
 
@@ -248,16 +259,19 @@ mcp/
 └── docs/
 ```
 
-CI 位於父倉庫的 [../../../.github/workflows/mcp-ci.yml](../../../.github/workflows/mcp-ci.yml)，執行程式碼檢查、單元測試及 Docker 建置。
+CI 位於父倉庫的 [../../../.github/workflows/mcp-ci.yml](../../../.github/workflows/mcp-ci.yml)，執行程式碼檢查、單元測試、wheel 安裝行為驗證及 Docker 建置。
 
 ## Docker 部署
+
+`-e MCP_HOST=0.0.0.0` 僅設定容器內部監聽位址，並覆蓋 `.env` 的本機預設值；宿主連接埠仍綁定 `127.0.0.1`。對外代理時仍須遵守共用 Key 的驗證規則。
 
 從倉庫根目錄進入 `mcp/` 後直接建置。執行以下命令：
 
 ```bash
 cd mcp
-docker build -t tickdb-mcp:0.2.3 .
-docker run -d --name tickdb-mcp -p 127.0.0.1:8000:8000 --env-file .env tickdb-mcp:0.2.3
+docker build -t tickdb-mcp:0.2.4 .
+docker volume create tickdb-mcp-data
+docker run -d --name tickdb-mcp --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data tickdb-mcp:0.2.4
 ```
 
 建置直接使用本目錄原始碼與 Dockerfile。客戶端存取本機 `http://localhost:8000/mcp`；遠端存取及 OAuth 部署使用 HTTPS 反向代理。啟用 OAuth 時，按上方[自部署設定](#oauth-setup)掛載資料庫持久化磁碟區並保留同一加密金鑰。

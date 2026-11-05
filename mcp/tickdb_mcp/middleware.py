@@ -101,7 +101,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
     1. Accept header compatibility — auto-fix clients that don't send both
        application/json and text/event-stream (e.g. Hermes MCP client).
     2. Bearer token gate — rejects requests when MCP_ACCESS_TOKEN is set
-       and the Authorization header doesn't match.
+       and the Authorization header doesn't match. A server-wide TickDB key
+       is never available to anonymous HTTP callers, even behind a proxy.
     3. TickDB key injection — reads X-TickDB-Key header and stores it in
        a ContextVar so tool handlers can use the caller's own API key.
     4. Session lifecycle logging — tracks session creation, reuse, and errors.
@@ -146,6 +147,19 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         # --- Key resolution ---
         tickdb_key = request.headers.get("x-tickdb-key", "").strip() or None
+        if settings.tickdb_api_key and not settings.mcp_access_token and not tickdb_key:
+            logger.warning(
+                "AUTH_REJECTED ip=%s method=%s path=%s reason=unauthenticated_shared_key",
+                client_ip, method, path,
+            )
+            return JSONResponse(
+                {
+                    "error": "Unauthorized",
+                    "hint": "Provide your own X-TickDB-Key, or configure MCP_ACCESS_TOKEN "
+                            "and send Authorization: Bearer <token> to use the server API key.",
+                },
+                status_code=401,
+            )
         key_label = _resolve_key_label(tickdb_key)
 
         # --- Session tracking ---

@@ -46,6 +46,28 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v --tb=short
 
+  package:
+    name: Installed wheel security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel from sdist
+        run: |
+          python -m pip install build
+          python -m build --outdir "$RUNNER_TEMP/mcp-dist" ./mcp
+      - name: Install wheel into a clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/mcp-wheel-venv"
+          "$RUNNER_TEMP/mcp-wheel-venv/bin/python" -m pip install "$RUNNER_TEMP"/mcp-dist/tickdb_mcp-*.whl
+          "$RUNNER_TEMP/mcp-wheel-venv/bin/python" -m pip check
+      - name: Verify installed entrypoint outside the checkout
+        run: |
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/mcp-wheel-venv/bin/python" "$GITHUB_WORKSPACE/mcp/scripts/verify_installed_package.py" --output "$RUNNER_TEMP/mcp-package-verification.json"
+
   docker:
     name: Docker build
     runs-on: ubuntu-latest

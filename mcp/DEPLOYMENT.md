@@ -2,7 +2,7 @@
 
 **语言：** **简体中文** · [繁體中文](docs/tw/DEPLOYMENT.md) · [English](docs/en/DEPLOYMENT.md)
 
-本仓库的 `mcp/` 是可独立运行的开源 Python MCP 服务。v0.2.3 提供 43 个工具（13 行情 + 29 公司财务与事件 + 1 API Key 订阅），支持外汇、贵金属、指数、美股、港股、A 股、中港期货与加密货币。
+本仓库的 `mcp/` 是可独立运行的开源 Python MCP 服务。v0.2.4 提供 43 个工具（13 行情 + 29 公司财务与事件 + 1 API Key 订阅），支持外汇、贵金属、指数、美股、港股、A 股、中港期货与加密货币。
 
 要求 Python 3.11+，或 Docker；以下说明以 Linux / Bash 为基准。行情查询与 OAuth Key 验证均需访问 `api.tickdb.ai`。HTTP 默认监听 8000 端口；公网 OAuth 需要 HTTPS 域名。
 
@@ -20,13 +20,13 @@ cp .env.example .env
 
 ### 配置 API Key 与服务
 
-在 `.env` 中按需设置：`X-TickDB-Key` 请求头优先，`TICKDB_API_KEY` 是服务器备用 Key。若不设置服务器 Key，客户端必须自带 Key。公网 Header 服务可设置 `MCP_ACCESS_TOKEN`，客户端同时传 `Authorization: Bearer <token>`。
+默认保持 `TICKDB_API_KEY` 和 `MCP_ACCESS_TOKEN` 为空，由客户端通过 `X-TickDB-Key` 提供自己的 Key。HTTP 仅监听本机；如需远程接入，显式配置监听地址或 HTTPS 反向代理，并为服务器共享 Key 配置访问认证。
 
 ```dotenv
 TICKDB_API_KEY=
 MCP_ACCESS_TOKEN=
 MCP_TRANSPORT=streamable-http
-MCP_HOST=0.0.0.0
+MCP_HOST=127.0.0.1
 MCP_PORT=8000
 MCP_STATELESS_HTTP=true
 MCP_SESSION_LOG_TTL_SECONDS=3600
@@ -36,6 +36,15 @@ LOG_RETAIN_DAYS=7
 LOG_DIR=logs
 OAUTH_ENABLED=false
 ```
+
+使用服务器共享 Key 时，在私有 `.env` 中同时设置以下两项，客户端改用 `Authorization: Bearer YOUR_MCP_ACCESS_TOKEN`，可省略 `X-TickDB-Key`：
+
+```dotenv
+TICKDB_API_KEY=YOUR_TICKDB_API_KEY
+MCP_ACCESS_TOKEN=YOUR_MCP_ACCESS_TOKEN
+```
+
+访问 Token 应使用随机强值，与 TickDB API Key 不同。配置访问 Token 后，所有 `/mcp` 请求都须携带正确 Bearer，包括自带 Key 的客户端。配置服务器 Key 却未设置访问 Token 时，不带自己 Key 的 HTTP 请求返回 401，即使来自本机或反向代理也不例外。
 
 ### 启动与验证
 
@@ -54,12 +63,14 @@ curl -X POST http://localhost:8000/mcp \
 
 ## Docker：从公开源码构建
 
+`-e MCP_HOST=0.0.0.0` 仅设置容器内部监听地址，并覆盖 `.env` 的本机默认值；宿主端口仍绑定 `127.0.0.1`。对外代理时仍须遵守共享 Key 的认证规则。
+
 在 `mcp/` 目录构建。首次安装先复制 `.env.example` 为 `.env` 并按上节配置；构建上下文已排除 `.env`、虚拟环境、数据和日志。执行以下命令：
 
 ```bash
-docker build -t tickdb-mcp:0.2.3 .
+docker build -t tickdb-mcp:0.2.4 .
 docker volume create tickdb-mcp-data
-docker run -d --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -v tickdb-mcp-data:/app/data --name tickdb-mcp tickdb-mcp:0.2.3
+docker run -d --restart unless-stopped -p 127.0.0.1:8000:8000 --env-file .env -e MCP_HOST=0.0.0.0 -v tickdb-mcp-data:/app/data --name tickdb-mcp tickdb-mcp:0.2.4
 docker logs -f tickdb-mcp
 ```
 
@@ -94,6 +105,8 @@ OAUTH_REDIRECT_URIS=["https://chatgpt.com/connector_platform_oauth_redirect","ht
 重启本地服务，或用同一 `.env` 和数据卷重新创建 Docker 容器。客户端 URL 为 `https://mcp.example.com/oauth`，认证选 OAuth，客户端 ID/Secret 留空，通过授权页验证并确认自己的 Key。协议、发现及回调细节见 [OAuth 配置与升级说明](README.md#oauth-setup)。
 
 ## HTTPS / Nginx 反向代理
+
+启用 OAuth 不会自动保护 `/mcp`。公开代理整个服务时，`/mcp` 仍按独立认证规则运行；匿名 HTTP 请求不能使用服务器共享 Key。
 
 为自己的域名申请证书后，将整个 origin 的路径原样转发到应用，包括 `/mcp`、`/oauth`、授权元数据、注册、授权页面、令牌和撤销路径：
 
@@ -151,6 +164,8 @@ sudo systemctl status tickdb-mcp
 
 ## 升级与持久化
 
+升级已有 HTTP 部署时，若原来仅设置了 `TICKDB_API_KEY`，不带请求 Key 的请求现在会返回 401。请新增随机强值 `MCP_ACCESS_TOKEN` 并为客户端配置对应 Bearer，或改由客户端通过 `X-TickDB-Key` 提供自己的 Key。已有 `.env` 不会被自动重写，若仍含 `MCP_HOST=0.0.0.0`，新认证规则仍会阻止匿名使用共享 Key；如仅需本机服务，请主动改为 `127.0.0.1`。
+
 1. 备份原 `.env`、OAuth 加密密钥与数据库。备份 SQLite 时使用 SQLite backup API，或停止服务后备份，确保备份一致。
 2. 替换源码并在原虚拟环境运行 `python -m pip install -e .`；Docker 则构建新镜像，保留原配置和同一数据卷，仅替换容器与镜像。
 3. 保留 `OAUTH_ENCRYPTION_KEY`、数据库文件与路径、`OAUTH_PUBLIC_URL`、回调白名单、注册客户端和有效授权；不要重新生成密钥、删除数据库或重置授权。
@@ -160,10 +175,10 @@ sudo systemctl status tickdb-mcp
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `TICKDB_API_KEY` | 空 | 备用服务器 Key；OAuth 不使用此 Key |
-| `MCP_ACCESS_TOKEN` | 空 | 仅保护请求头接入 `/mcp` 的固定 Bearer Token |
+| `TICKDB_API_KEY` | 空 | 服务器统一 Key；HTTP 回退使用须通过 Bearer 认证，请求头 Key 优先；OAuth 不使用 |
+| `MCP_ACCESS_TOKEN` | 空 | `/mcp` 的固定 Bearer Token；空时仅允许使用请求自己的 Key，不能借用服务器 Key |
 | `MCP_TRANSPORT` | `streamable-http` | HTTP 或本地 stdio |
-| `MCP_HOST` | `0.0.0.0` | 监听地址 |
+| `MCP_HOST` | `127.0.0.1` | 监听地址 |
 | `MCP_PORT` | `8000` | 监听端口 |
 | `MCP_STATELESS_HTTP` | `true` | 无状态 HTTP，避免积累遗留会话 |
 | `MCP_SESSION_LOG_TTL_SECONDS` | `3600` | 会话 ID 日志缓存的保留秒数 |
@@ -179,6 +194,7 @@ sudo systemctl status tickdb-mcp
 
 ## 常见问题
 
+- HTTP 401：若设置了 `MCP_ACCESS_TOKEN`，提供正确 Bearer；若仅设置服务器共享 Key，补充访问 Token，或改由客户端通过 `X-TickDB-Key` 提供自己的 Key。
 - `Address already in use`：调整 `.env` 中的 `MCP_PORT`，并同步客户端 URL 或代理目标。
 - `No TickDB API key provided` / `1001`：检查客户端 `X-TickDB-Key` 或服务器 `TICKDB_API_KEY`。`1005` 表示 Key 已过期。
 - OAuth 启动失败：检查 HTTPS origin、Fernet 密钥、回调 JSON 与数据库写权限；已有数据库须使用对应密钥和 origin。
