@@ -2,6 +2,9 @@
 name = "tickdb-mcp"
 version = "0.2.4"
 description = "TickDB market data and company fundamentals MCP server"
+readme = "README_PYPI.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]>=1.26.0,<2.0.0",
@@ -22,6 +25,13 @@ dev = [
 
 [project.scripts]
 tickdb-mcp = "main:main"
+
+[project.urls]
+Homepage = "https://tickdb.ai"
+Documentation = "https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/mcp/docs/en/README.md"
+"API documentation" = "https://docs.tickdb.ai"
+Source = "https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/tree/main/mcp"
+Issues = "https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/issues"
 
 [build-system]
 requires = ["hatchling"]

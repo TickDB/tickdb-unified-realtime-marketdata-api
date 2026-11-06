@@ -7,6 +7,8 @@
 - HTTP 預設僅監聽 `127.0.0.1:8000`；容器內部仍明確監聽 `0.0.0.0`，宿主連接埠綁定本機。
 - 禁止匿名 HTTP 請求使用伺服器共用 Key：設定 `TICKDB_API_KEY` 後，未提供請求 Key 且未設定 `MCP_ACCESS_TOKEN` 的請求回傳 401；正確 Bearer、請求自帶 Key、OAuth 綁定和本地 stdio 保留各自使用方式。
 - 同步三語言安裝、部署和接入說明，並增加安全預設值與安裝套件行為驗證。
+- 補充 PyPI 專用長描述、MIT 授權中繼資料及官網、原始碼、Issues 和文件連結。
+- 正式發佈 `mcp/v*` GitHub Release 時，先驗證固定提交、套件版本、測試和安裝產物，再透過 `pypi` 環境的 Trusted Publishing 自動上傳 wheel 與 sdist。
 - 升級既有 HTTP 部署時，若原來僅設定了 `TICKDB_API_KEY`，不帶請求 Key 的請求現在會回傳 401。請新增隨機強值 `MCP_ACCESS_TOKEN` 並為客戶端設定對應 Bearer，或改由客戶端透過 `X-TickDB-Key` 提供自己的 Key。既有 `.env` 不會被自動改寫，若仍含 `MCP_HOST=0.0.0.0`，新驗證規則仍會阻止匿名使用共用 Key；如僅需本機服務，請主動改為 `127.0.0.1`。
 
 ## v0.2.3 — 2026-10-15

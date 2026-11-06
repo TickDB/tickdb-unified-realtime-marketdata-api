@@ -7,6 +7,8 @@
 - Bind HTTP to local `127.0.0.1:8000` by default; containers explicitly bind internally to `0.0.0.0` while publishing the host port locally.
 - Block anonymous HTTP use of the shared server Key: with `TICKDB_API_KEY` configured, requests with neither a caller-supplied Key nor a configured `MCP_ACCESS_TOKEN` return 401. Valid Bearer access, caller-supplied Keys, OAuth bindings, and local stdio retain their respective authentication flows.
 - Synchronize installation, deployment, and client instructions in three languages and add security-default and installed-package verification.
+- Add a PyPI-specific long description, MIT license metadata, and official website, source, issue tracker, and documentation links.
+- On a formal `mcp/v*` GitHub Release, validate the fixed commit, package version, tests, and installed artifacts before uploading the wheel and sdist through Trusted Publishing in the `pypi` environment.
 - When upgrading an HTTP deployment that previously set only `TICKDB_API_KEY`, requests without a request Key now return 401. Add a strong random `MCP_ACCESS_TOKEN` and the matching client Bearer token, or have clients supply their own `X-TickDB-Key`. Existing `.env` files are not rewritten automatically. If yours still sets `MCP_HOST=0.0.0.0`, the new authentication rule still blocks anonymous shared-Key use; set it to `127.0.0.1` if only local access is needed.
 
 ## v0.2.3 — 2026-10-15

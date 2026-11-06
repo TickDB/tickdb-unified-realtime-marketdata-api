@@ -7,7 +7,7 @@ ARG VCS_REF=unknown
 LABEL org.opencontainers.image.version="$RELEASE_VERSION" \
       org.opencontainers.image.revision="$VCS_REF"
 
-COPY pyproject.toml .
+COPY pyproject.toml README_PYPI.md LICENSE ./
 COPY tickdb_mcp/ tickdb_mcp/
 COPY main.py .
 RUN pip install --no-cache-dir .

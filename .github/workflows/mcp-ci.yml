@@ -6,11 +6,13 @@ on:
     paths:
       - 'mcp/**'
       - '.github/workflows/mcp-ci.yml'
+      - '.github/workflows/mcp-publish.yml'
   pull_request:
     branches: [main]
     paths:
       - 'mcp/**'
       - '.github/workflows/mcp-ci.yml'
+      - '.github/workflows/mcp-publish.yml'
 
 jobs:
   lint:
